@@ -1,10 +1,9 @@
 import re
 import os
-from operator import itemgetter
 import csv
 
-n = 29
-m = 1500
+n = 100
+m = 1900
 k = 0
 
 
@@ -20,7 +19,6 @@ with open('most_common_words.csv', 'r') as csv_file:        # read from the most
     for i in csvreader:                   
         l.append(i[0])
 
-print(l)
 
 for i in posNegList:            # create verctors for the traing data (positie/negative) 
 

@@ -3,12 +3,12 @@ import os
 from operator import itemgetter
 import csv
 
-n = 29
-m = 1500
+n = 100
+m = 1900
 k = 0
 
 
-posNegList = ["pos", "neg"]
+posNegList = ["neg", "pos"]
 dict1 = {}
 s1 = "aclImdb\\train\\"
 s2= "\\"
