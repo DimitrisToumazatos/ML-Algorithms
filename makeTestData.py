@@ -4,7 +4,7 @@ import csv
 
 posNegList = ["pos", "neg"]
 dict1 = {}
-s1 = "aclImdb\\dev\\"
+s1 = "aclImdb\\train\\"
 s2= "\\"
 
 l =[]
@@ -19,7 +19,7 @@ for i in posNegList:            # create verctors for the traing data (positie/n
 
     DIR = s1+i+s2
     dev = []
-    list1 = os.listdir(DIR)     #a function which creates a list which contains the file names in the DIR folder 
+    list1 = os.listdir(DIR)     # a function which creates a list which contains the file names in the DIR folder 
     for filename in list1:
         words = re.findall(r'\w+', open(s1+i+s2 + filename, encoding="utf8").read().lower())
         vec = []
@@ -31,9 +31,9 @@ for i in posNegList:            # create verctors for the traing data (positie/n
         dev.append(vec)
 
     if i == "pos":
-        temp = "positiveDev.csv"
+        temp = "positiveTest.csv"
     else:
-        temp = "negativeDev.csv"
+        temp = "negativeTest.csv"
         
     with open(temp, 'w', newline='') as csv_file:  
         writer = csv.writer(csv_file)
