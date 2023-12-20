@@ -3,8 +3,8 @@ import os
 from operator import itemgetter
 import csv
 
-n = 100
-m = 1900
+n = 130 #For bayes algorithm we want it 130 for 80% accuracy
+m = 1700  #For bayes algorithm we want it 1700 for 80% accuracy
 k = 0
 
 

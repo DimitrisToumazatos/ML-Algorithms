@@ -62,7 +62,7 @@ class NaiveBayes:
       if probP >= probN:
         countPos += 1
 
-    print("For the positive examples the accuracy is: " + str(round(((countPos/df.shape[0]) * 100), 2)))   #86.56  
+    print("For the positive examples the accuracy is: " + str(round(((countPos/df.shape[0]) * 100), 2)))   #84.58 
 
 
     countNeg = 0
@@ -76,7 +76,7 @@ class NaiveBayes:
         countNeg += 1
 
     
-    print("For the negative examples the accuracy is: " + str(round(((countNeg/df.shape[0]) * 100), 2)))  #72.24
+    print("For the negative examples the accuracy is: " + str(round(((countNeg/df.shape[0]) * 100), 2)))  #78.3
     
 
   def calculateProb(self, category, row):
@@ -101,3 +101,5 @@ class NaiveBayes:
 Nb = NaiveBayes()
 Nb.train("positive.csv", "negative.csv")
 Nb.test("positiveDev.csv", "negativeDev.csv")
+Nb.test("positiveTest.csv", "negativeTest.csv")
+Nb.test("positive.csv", "negative.csv")
