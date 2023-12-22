@@ -16,7 +16,6 @@ class NaiveBayes:
     pass
 
   def train(self, pos_filename, neg_filename):
-    nNeg = 0
     df = pd.read_csv(pos_filename, header=None)
     nPos = df.shape[0]      #shape[0] contains the number of rows + 1 of our file
     
