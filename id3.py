@@ -22,8 +22,7 @@ class ID3:
         creates the tree
         '''
         most_common = mode(y.flatten())
-        self.tree = self.create_tree(x, y, features=np.arange(len(self.features)), category=most_common)
-        return self.tree
+        self.tree = self.create_tree(x, y, features=self.features, category=most_common)
     
     def create_tree(self, x_train, y_train, features, category):
         
@@ -109,7 +108,7 @@ class ID3:
                 if unlabeled.flatten()[tmp.checking_feature] == 1:
                     tmp = tmp.left_child
                 else:
-                    tmp = tmp.right_child
+                    tmp = tmp.right_child            
             
             predicted_classes.append(tmp.category)
         

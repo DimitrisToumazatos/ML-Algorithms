@@ -8,12 +8,22 @@ from operator import add
 
 
 class RandomForest:
+    # n = 51, m = 100, PosAccuracy = 75 %, NegAccuracy = 49 %
+    # n = 301, m = 40, PosAccuracy = 79 %, NegAccuracy = 38 %
     # n = 101, m = 40, PosAccuracy = 79 %, NegAccuracy = 38 %
+    # n = 351, m = 35, PosAccuracy = 78 %, NegAccuracy = 38 %
+    # n = 101, m = 33, PosAccuracy = 79 %, NegAccuracy = 38 %
+    # n = 351, m = 30, PosAccuracy = 39 %, NegAccuracy = 74 %
+    # n = 401, m = 30, PosAccuracy = 39 %, NegAccuracy = 74 %
+    # n = 501, m = 25, PosAccuracy = 36 %, NegAccuracy = 76 %
+    # n = 101, m = 10, PosAccuracy = 22 %, NegAccuracy = 83 %
+    # n = 501, m = 5, PosAccuracy = 13 %, NegAccuracy = 89 %
     def __init__(self, n, m):
         self.nTrees = n
         self.mFeatures = m 
         self.trainingList = []
         self.trainingListResults = []
+        self.trees = []
 
 
     def train(self, pos_filename, neg_filename):
@@ -40,10 +50,14 @@ class RandomForest:
         self.trainingList = np.array(self.trainingList)
         self.trainingListResults = np.array(self.trainingListResults)
 
-        self.trees = []
+        count = 0
         for i in range(self.nTrees):
-            features = [randint(0, int((df.size/df.shape[0])-1)) for i in range(self.mFeatures)]
-            self.trees.append(ID3(features))
+            #
+            print("Tree: " + str(count))
+            count+=1
+            #
+            features = [randint(0, int((df.shape[1])-1)) for i in range(self.mFeatures)]
+            self.trees.append(ID3(np.array(features)))
             self.trees[i].fit(self.trainingList, self.trainingListResults) 
 
         print("Training finished")
@@ -70,19 +84,19 @@ class RandomForest:
             row = [int(x) for x in df.iloc[i, :]]
             testData.append(row)
 
-
         print("Calculating output...")
 
         testData = np.array(testData)
         treeOut = [0] * testData.shape[0]            # predict the estimated results for each examples
+
         for t in self.trees:   
-            temp = t.predict(testData) 
-            temp = list(temp) 
+            temp = list(t.predict(testData))
             treeOut = list(map(add, treeOut, temp))
 
         finalPositive = 0
         finalNegative = 0
 
+        print(treeOut)
         count = 0
         for i in treeOut:                          # get the accuracy of the model
          
@@ -107,15 +121,15 @@ class RandomForest:
         
 
 
-myRandomForest = RandomForest(101, 40)                               # create object
+myRandomForest = RandomForest(100, 10)                              # create object
 myRandomForest.train("positive.csv", "negative.csv")                 # train model
 
-print("Save training this time...")
-        
-with open('myRandomForest.pkl', 'wb') as outp:                       # save object 
+print("Save model...")
+
+with open('myRandomForest-100-10.pkl', 'wb') as outp:                       # save object 
     pickle.dump(myRandomForest, outp, pickle.HIGHEST_PROTOCOL) 
 
-with open('myRandomForest.pkl', 'rb') as inp:                        # read saved object
+with open('myRandomForest-100-10.pkl', 'rb') as inp:                        # read saved object
     myRandomForest = pickle.load(inp)
 
 myRandomForest.test("positiveDev.csv", "negativeDev.csv")            # test model
