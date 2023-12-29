@@ -53,6 +53,7 @@ class RandomForest:
             features = [randint(0, int((df.shape[1])-1)) for i in range(self.mFeatures)]        # create the tree
             self.trees.append(ID3(np.array(features)))
             self.trees[i].fit(self.trainingList, self.trainingListResults) 
+            print("Tree number " + str(i) + " has been created!")
 
         print("Training finished")
 
@@ -96,7 +97,7 @@ class RandomForest:
 
         count = 0
         for i in treeOut:                          # get the accuracy of the model
-         
+            print(treeOut)
             if count < totalPosTests:
                 if i > self.nTrees/2:
                     finalPositive += 1
