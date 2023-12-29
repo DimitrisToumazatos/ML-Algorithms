@@ -8,55 +8,49 @@ from operator import add
 
 
 class RandomForest:
-    # n = 51, m = 100, PosAccuracy = 75 %, NegAccuracy = 49 %
-    # n = 301, m = 40, PosAccuracy = 79 %, NegAccuracy = 38 %
-    # n = 101, m = 40, PosAccuracy = 79 %, NegAccuracy = 38 %
-    # n = 351, m = 35, PosAccuracy = 78 %, NegAccuracy = 38 %
-    # n = 101, m = 33, PosAccuracy = 79 %, NegAccuracy = 38 %
-    # n = 351, m = 30, PosAccuracy = 39 %, NegAccuracy = 74 %
-    # n = 401, m = 30, PosAccuracy = 39 %, NegAccuracy = 74 %
-    # n = 501, m = 25, PosAccuracy = 36 %, NegAccuracy = 76 %
-    # n = 101, m = 10, PosAccuracy = 22 %, NegAccuracy = 83 %
-    # n = 501, m = 5, PosAccuracy = 13 %, NegAccuracy = 89 %
+    # n = 301, m = 40, PosAccuracy = 76 %, NegAccuracy = 100 %
+    # n = 301, m = 50, PosAccuracy = 77 %, NegAccuracy = 100 %
     def __init__(self, n, m):
-        self.nTrees = n
-        self.mFeatures = m 
-        self.trainingList = []
-        self.trainingListResults = []
-        self.trees = []
-
+        self.nTrees = n                 # number of trees
+        self.mFeatures = m              # number of features
+        self.trainingList = []          # list containing the vectors for the training examples
+        self.trainingListResults = []   # list containing the correct category for each of the above examples
+        self.trees = []                 # list containing the trees
 
     def train(self, pos_filename, neg_filename):
         
         print("Training started")
+
+
         print("Reading positive training data...")
+        df = pd.read_csv(pos_filename, header=None)         # read positive examples
 
-        df = pd.read_csv(pos_filename, header=None)
         for i in range(df.shape[0]):
             row = [int(x) for x in df.iloc[i, :]]
             self.trainingList.append(row)
-            self.trainingListResults.append(1) # is positive
+            self.trainingListResults.append(1)              # is positive
 
 
-        print("Reading negative training data...")        
+        print("Reading negative training data...")
+        df = pd.read_csv(neg_filename, header = None)       # read negative examples
 
-        df = pd.read_csv(neg_filename, header = None)
         for i in range(df.shape[0]):
             row = [int(x) for x in df.iloc[i, :]]
             self.trainingList.append(row)
-            self.trainingListResults.append(0)  # is negative
+            self.trainingListResults.append(0)              # is negative
+
 
         print("Creating Trees...")
+
         self.trainingList = np.array(self.trainingList)
         self.trainingListResults = np.array(self.trainingListResults)
 
         count = 0
         for i in range(self.nTrees):
-            #
-            print("Tree: " + str(count))
+            print("Tree: " + str(count))                    # print the count of trained trees
             count+=1
-            #
-            features = [randint(0, int((df.shape[1])-1)) for i in range(self.mFeatures)]
+
+            features = [randint(0, int((df.shape[1])-1)) for i in range(self.mFeatures)]        # create the tree
             self.trees.append(ID3(np.array(features)))
             self.trees[i].fit(self.trainingList, self.trainingListResults) 
 
@@ -66,11 +60,14 @@ class RandomForest:
     def test(self, pos_filename, neg_filename):
 
         print("Test started")
+
         print("Testing positive test data...")
         
+        testData = []
+
         df = pd.read_csv(pos_filename, header = None) # read positive examples
         totalPosTests = df.shape[0]
-        testData = []
+
         for i in range(totalPosTests):
             row = [int(x) for x in df.iloc[i, :]]
             testData.append(row)
@@ -80,6 +77,7 @@ class RandomForest:
 
         df = pd.read_csv(neg_filename, header = None) # read negative examples
         totalNegTests = df.shape[0]
+
         for i in range(totalNegTests):
             row = [int(x) for x in df.iloc[i, :]]
             testData.append(row)
@@ -96,7 +94,6 @@ class RandomForest:
         finalPositive = 0
         finalNegative = 0
 
-        print(treeOut)
         count = 0
         for i in treeOut:                          # get the accuracy of the model
          
@@ -110,28 +107,28 @@ class RandomForest:
 
         print("Test finished")
 
-        print(finalPositive)
-        print(finalNegative)
-        print(totalPosTests)
-        print(totalNegTests)
+        print("True Positive: " + str(finalPositive))                           # F1 Score
+        print("False Positive: " + str(totalNegTests-finalNegative))
+        print("True Negative: " + str(finalNegative))
+        print("False Negative: " + str(totalPosTests-finalPositive))
 
         # print accuracy
         print("For the positive examples the accuracy is: " + str(round(((finalPositive/totalPosTests) * 100), 2)))   
         print("For the negative examples the accuracy is: " + str(round(((finalNegative/totalNegTests) * 100), 2)))  
         
 
-
-myRandomForest = RandomForest(100, 10)                              # create object
+myRandomForest = RandomForest(301, 40)                               # create object
 myRandomForest.train("positive.csv", "negative.csv")                 # train model
 
 print("Save model...")
 
-with open('myRandomForest-100-10.pkl', 'wb') as outp:                       # save object 
+with open('myRandomForest-301-40-16k.pkl', 'wb') as outp:            # save object 
     pickle.dump(myRandomForest, outp, pickle.HIGHEST_PROTOCOL) 
-
-with open('myRandomForest-100-10.pkl', 'rb') as inp:                        # read saved object
+"""
+with open('myRandomForest-301-40-16k.pkl', 'rb') as inp:             # read saved object
     myRandomForest = pickle.load(inp)
+"""
 
-myRandomForest.test("positiveDev.csv", "negativeDev.csv")            # test model
+myRandomForest.test("positiveTest.csv", "negativeTest.csv")          # test model
 
 
