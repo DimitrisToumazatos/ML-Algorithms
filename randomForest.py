@@ -123,10 +123,10 @@ myRandomForest.train("positive.csv", "negative.csv")                 # train mod
 
 print("Save model...")
 
-with open('myRandomForest-301-40-16k.pkl', 'wb') as outp:            # save object 
+with open('myRandomForest-301-40.pkl', 'wb') as outp:            # save object 
     pickle.dump(myRandomForest, outp, pickle.HIGHEST_PROTOCOL) 
 """
-with open('myRandomForest-301-40-16k.pkl', 'rb') as inp:             # read saved object
+with open('myRandomForest-301-40.pkl', 'rb') as inp:             # read saved object
     myRandomForest = pickle.load(inp)
 """
 
