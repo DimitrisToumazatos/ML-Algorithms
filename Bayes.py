@@ -24,7 +24,7 @@ class NaiveBayes:
     nPos = df.shape[0]                                              # shape[0] contains the number of rows of our file
     
     pos_vocabulary_count = [0 for j in range(df.shape[1])]          # it creates a table of zeros the length of a row
-
+    
     for i in range(nPos):
       row = [int(x) for x in df.iloc[i, :]]                               # df.iloc function returns the row of our csv that we tell it to give. 
                                                                           # here we create a table with the elements of each row 
@@ -40,7 +40,7 @@ class NaiveBayes:
     
     neg_vocabulary_count = [0 for j in range(df.shape[1])]                # create a table of zeros the length of a row
 
-    for i in range(nNeg):
+    for i in range(nNeg):     
       row = [int(x) for x in df.iloc[i, :]]                               # create a table with the elements of each row
       neg_vocabulary_count = list(map( add, neg_vocabulary_count, row))   # get the count of each word (feature) in the negative examples
     
@@ -84,15 +84,20 @@ class NaiveBayes:
       if probP <= probN:
         trueNegative += 1
 
+    falsePositive = numberOfNegative - trueNegative
+    falseNegative = numberOfPositive - truePositive
 
+    # print test statistics
     print("True Positive: " + str(truePositive))
-    print("False Positive: " + str(numberOfNegative - trueNegative))
+    print("False Positive: " + str(falsePositive))
     print("True Negative: " + str(trueNegative))
-    print("False Negative: " + str(numberOfPositive - truePositive))
+    print("False Negative: " + str(falseNegative))
     print("The accuracy for the positive data is: " + str(round(((truePositive/numberOfPositive) * 100), 2)))   # 84.58 
     print("The accuracy for the negative data is: " + str(round(((trueNegative/numberOfNegative) * 100), 2)))  # 78.3
     print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(numberOfNegative + numberOfPositive)) * 100), 2)))  
-    
+    print("For the positive data the precision is: " + str(round((truePositive/(truePositive+falsePositive) * 100), 2)))   
+    print("For the positive data the recall is: " + str(round((truePositive/(truePositive+falseNegative)) * 100, 2)))   
+
 
   def calculateProb(self, category, row):
     prob = 0
@@ -117,13 +122,12 @@ class NaiveBayes:
 myNaiveBayes = NaiveBayes()
 myNaiveBayes.train("positiveTrain.csv", "negativeTrain.csv")
 
-with open('myBayes-20k.pkl', 'wb') as outp:            # save object 
+"""
+with open('myBayes-16k.pkl', 'wb') as outp:            # save object 
     pickle.dump(myNaiveBayes, outp, pickle.HIGHEST_PROTOCOL) 
-"""
+
 with open('myBayes-20k.pkl', 'rb') as inp:             # read saved object
-    myRandomForest = pickle.load(inp)
+    myNaiveBayes = pickle.load(inp)
 """
-print("\nTest\n")
+
 myNaiveBayes.test("positiveTest.csv", "negativeTest.csv")
-print("\nTrain\n")
-myNaiveBayes.test("positiveTrain.csv", "negativeTrain.csv")
