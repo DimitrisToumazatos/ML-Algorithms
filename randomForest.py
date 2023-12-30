@@ -92,43 +92,47 @@ class RandomForest:
             temp = list(t.predict(testData))
             treeOut = list(map(add, treeOut, temp))
 
-        finalPositive = 0
-        finalNegative = 0
+        truePositive = 0
+        trueNegative = 0
 
         count = 0
         for i in treeOut:                          # get the accuracy of the model
-            print(treeOut)
             if count < totalPosTests:
                 if i > self.nTrees/2:
-                    finalPositive += 1
+                    truePositive += 1
             else:
                 if i < self.nTrees:
-                    finalNegative += 1
+                    trueNegative += 1
             count+=1
 
         print("Test finished")
 
-        print("True Positive: " + str(finalPositive))                           # F1 Score
-        print("False Positive: " + str(totalNegTests-finalNegative))
-        print("True Negative: " + str(finalNegative))
-        print("False Negative: " + str(totalPosTests-finalPositive))
-
-        # print accuracy
-        print("For the positive examples the accuracy is: " + str(round(((finalPositive/totalPosTests) * 100), 2)))   
-        print("For the negative examples the accuracy is: " + str(round(((finalNegative/totalNegTests) * 100), 2)))  
+        falsePositive = totalNegTests-trueNegative
+        falseNegative = totalPosTests-truePositive
+        # print statostics
+        print("True Positive: " + str(truePositive))                      
+        print("False Positive: " + str(falsePositive))
+        print("True Negative: " + str(trueNegative))
+        print("False Negative: " + str(falseNegative))
+        print("For the positive examples the accuracy is: " + str(round(((truePositive/totalPosTests) * 100), 2)))   
+        print("For the negative examples the accuracy is: " + str(round(((trueNegative/totalNegTests) * 100), 2)))  
+        print("The total accuracy is: " + str(round((((trueNegative+truePositive)/(totalNegTests+totalPosTests)) * 100), 2)))  
+        print("The precision for the negative test data is: " + str(round(((trueNegative/(trueNegative+falseNegative)) * 100), 2)))  
+        print("The recall for the negative test data is: " + str(round(((trueNegative/(trueNegative+falsePositive)) * 100), 2)))  
         
-
+"""
 myRandomForest = RandomForest(301, 40)                               # create object
 myRandomForest.train("positive.csv", "negative.csv")                 # train model
+
 
 print("Save model...")
 
 with open('myRandomForest-301-40.pkl', 'wb') as outp:            # save object 
     pickle.dump(myRandomForest, outp, pickle.HIGHEST_PROTOCOL) 
 """
-with open('myRandomForest-301-40.pkl', 'rb') as inp:             # read saved object
+with open('myRandomForest-301-40-20k.pkl', 'rb') as inp:             # read saved object
     myRandomForest = pickle.load(inp)
-"""
+
 
 myRandomForest.test("positiveTest.csv", "negativeTest.csv")          # test model
 
