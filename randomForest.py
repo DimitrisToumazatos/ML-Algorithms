@@ -120,9 +120,9 @@ class RandomForest:
         print("The precision for the negative test data is: " + str(round(((trueNegative/(trueNegative+falseNegative)) * 100), 2)))  
         print("The recall for the negative test data is: " + str(round(((trueNegative/(trueNegative+falsePositive)) * 100), 2)))  
         
-"""
+
 myRandomForest = RandomForest(301, 40)                               # create object
-myRandomForest.train("positive.csv", "negative.csv")                 # train model
+myRandomForest.train("positiveTrain.csv", "negativeTrain.csv")                 # train model
 
 
 print("Save model...")
@@ -132,7 +132,7 @@ with open('myRandomForest-301-40.pkl', 'wb') as outp:            # save object
 """
 with open('myRandomForest-301-40-20k.pkl', 'rb') as inp:             # read saved object
     myRandomForest = pickle.load(inp)
-
+"""
 
 myRandomForest.test("positiveTest.csv", "negativeTest.csv")          # test model
 
