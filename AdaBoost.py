@@ -3,22 +3,33 @@ import math
 from random import random
 
 class SingleDepthTree:  #We used the id3 algorithm given from our instructors adapted to create just single depth trees
-    def __init__(self, features, category):
-        self.category = category
-        self.features = features
+    def __init__(self, feature):
+        self.feature = feature
+        self.category_0 = -1
+        self.category_1 = -1
     
-    def fit(self, x):
-        self.table = self.TableCreation(x)
+    def fit(self, x, y):
+        self.table = self.TableCreation(x, y)
 
-    def TableCreation(self, x_train): #Works a tree with depth = 1, the category is saved inside the table 
-        table = []
-        for i in x_train:
-            if(i[self.feature] == 1):
-                table.append(self.category)
+    def TableCreation(self, x_train, y_train): #Works a tree with depth = 1, the category is saved inside the table 
+        results_0 = []
+        results_1 = []
+        for i in range(len(x_train)):
+            if(x_train[i][self.feature] == 1):
+                results_1.append(y_train[i])
             else:
-                table.append(abs(1-self.category))
-        return table
-        
+                results_0.append(y_train[i])
+        if (results_1.count(0) > results_1.count(1)):
+            self.category_1 = 0
+        else:
+            self.category_1 = 1
+        if (results_0.count(0) > results_0.count(1)):
+            self.category_0 = 0
+        else:
+            self.category_0 = 1
+
+    def predict(feature, row):
+        return
     
     
     
@@ -31,8 +42,10 @@ class AdaBoost:
         self.Hypotheses = []
         self.weights = [1 / len(expectedResults) for i in range(len(expectedResults))] 
     
-    
-    def MakeHypotheses(self):
+    def fit(self, features):
+        return
+
+    def MakeHypotheses(self, features):
         for i in range(self.m):
             igs = []
             for feat_index in features:
@@ -42,10 +55,10 @@ class AdaBoost:
             error = 0
             for j in range(len(self.expectedResults)):
                 if (self.Hypotheses[j] != self.expectedResults[j]): #if the hypothesis differs from the expected result, increase the error
-                    error+=self.weights[j]
-                if (error>=0.5):
-                    self.m-=1
-                    break
+                    error += self.weights[j]
+            if (error >= 0.5):
+                self.m -= 1
+                break
             for i in range(self.expectedResults): #change weights based on the errors
                     if (self.Hypotheses[j] == self.expectedResults[j]):
                         if(error != 1):
@@ -53,9 +66,13 @@ class AdaBoost:
             self.normalizeWeights()
             z = [] 
             for i in range(self.m):
-                z[i].append(0.5*log(1-error/error))
+                if (error != 0):
+                    z.append(0.5*log(1-error/error))
+                else:
+                    z.append(1)
             
-            self.DatasetReconstruction() #increase or decrease the weights of each hypothesis based on if the hypothesis was correct
+            self.DatasetReconstruction() #Reconstructs the dataset based on the weight of each example given
+        self.Weighted_Majority(z)
     
     def normalizeWeights(self): #function to normalize weights to sum up to 1
         sum = sum(self.weights)
@@ -104,5 +121,24 @@ class AdaBoost:
 
         ig = HC - HC_feature
         return ig
+    
+    def Weighted_Majority(self, z):
+        Zeros_weight = 0
+        Ones_weight = 0
+        for i in range(self.m):
+            if (self.Hypotheses[i] == 0):
+                Zeros_weight += z[i]
+            else:
+                Ones_weight += z[i]
+        if (Zeros_weight > Ones_weight):
+            return 0
+        elif (Ones_weight > Zeros_weight):
+            return 1
+        else:
+            randomNum = round(random.random())
+            if (randomNum == 0):
+                return 0
+            else:
+                return 1
 
     
