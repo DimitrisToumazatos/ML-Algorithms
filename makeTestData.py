@@ -34,7 +34,7 @@ for i in posNegList:            # create verctors for the traing data (positie/n
         temp = "positiveTest.csv"
     else:
         temp = "negativeTest.csv"
-        
+
     with open(temp, 'w', newline='') as csv_file:  
         writer = csv.writer(csv_file)
         writer.writerows(test)

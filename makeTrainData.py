@@ -3,8 +3,8 @@ import os
 from operator import itemgetter
 import csv
 
-n = 130 #For bayes algorithm we want it 130 for 80% accuracy
-m = 1700  #For bayes algorithm we want it 1700 for 80% accuracy
+n = 130          #For bayes algorithm we want it 130 for 80% accuracy
+m = 1700         #For bayes algorithm we want it 1700 for 80% accuracy
 k = 0
 
 
@@ -26,8 +26,12 @@ for i in posNegList:                    # read training data and calculate count
 
 most_common = dict(sorted(dict1.items(), key=itemgetter(1), reverse=True)[:m]) # create and sort dictionary of most common words and their count 
 
+print(len(most_common))
+
 
 l = list(most_common.keys())[n:]
+
+print(len(l))
 
 
 
@@ -38,7 +42,7 @@ with open('most_common_words.csv', 'w', newline='', encoding="utf8") as csv_file
 
 
 for i in posNegList:            # create verctors for the traing data (positie/negative) 
-
+    print(1)
     DIR = s1+i+s2
     train = []
     list1 = os.listdir(DIR)     #a function which creates a list which contains the file names in the DIR folder 
@@ -53,9 +57,9 @@ for i in posNegList:            # create verctors for the traing data (positie/n
         train.append(vec)
 
     if i == "pos":
-        temp = "positive.csv"
+        temp = "positiveTrain.csv"
     else:
-        temp = "negative.csv"
+        temp = "negativeTrain.csv"  
         
     with open(temp, 'w', newline='') as csv_file:  
         writer = csv.writer(csv_file)
