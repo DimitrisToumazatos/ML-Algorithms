@@ -1,84 +1,103 @@
-from cmath import log
+from math import log2
 import math
-from random import random
+import random
 
 class SingleDepthTree:  #We used the id3 algorithm given from our instructors adapted to create just single depth trees
     def __init__(self, feature):
         self.feature = feature
-        self.category_0 = -1
-        self.category_1 = -1
+        self.table = []
     
     def fit(self, x, y):
-        self.table = self.TableCreation(x, y)
+        category_0, category_1 = self.TableCreation(x, y)
+        self.table.append(category_0)
+        self.table.append(category_1)
 
     def TableCreation(self, x_train, y_train): #Works a tree with depth = 1, the category is saved inside the table 
         results_0 = []
         results_1 = []
+        category_1 = -1
+        category_0 = -1
         for i in range(len(x_train)):
             if(x_train[i][self.feature] == 1):
                 results_1.append(y_train[i])
             else:
                 results_0.append(y_train[i])
         if (results_1.count(0) > results_1.count(1)):
-            self.category_1 = 0
+            category_1 = 0
         else:
-            self.category_1 = 1
+            category_1 = 1
         if (results_0.count(0) > results_0.count(1)):
-            self.category_0 = 0
+            category_0 = 0
         else:
-            self.category_0 = 1
+            category_0 = 1
+        return category_0, category_1
 
-    def predict(feature, row):
-        return
+    def predict(self, row):
+        if (row[self.feature] == 0):
+            return self.table[0]
+        else:
+            return self.table[1]
+        
     
     
     
 class AdaBoost:
-    def __init__(self, Dataset_x, expectedResults, algorithm, M): # M = number of hypotheses
+    def __init__(self, Dataset_x, expectedResults, M): # M = number of hypotheses
         self.Dataset = Dataset_x
         self.expectedResults = expectedResults
-        self.algorithm = algorithm
         self.m = M
+        self.z = []
         self.Hypotheses = []
-        self.weights = [1 / len(expectedResults) for i in range(len(expectedResults))] 
-    
-    def fit(self, features):
-        return
+        self.weights = [1 / len(expectedResults) for i in range(len(expectedResults))]
 
+    def fit(self):
+        features = []
+        for i in range(self.m):
+            features.append(random.randint(0, 1570))
+        self.MakeHypotheses(features)
+    
     def MakeHypotheses(self, features):
         for i in range(self.m):
             igs = []
             for feat_index in features:
                 igs.append(self.InformationGain([example[feat_index] for example in self.Dataset]))
             maxIG = igs.index(max(igs))
-            self.Hypotheses = self.algorithm(maxIG)
+            SDT = SingleDepthTree(maxIG)
+            self.Hypotheses.append(SDT)
+            SDT.fit(self.Dataset, self.expectedResults)
+            algorithm_results = []
+            for row in self.Dataset:
+                algorithm_results.append(SDT.predict(row))
             error = 0
+            print(len(self.expectedResults))
+            print(len(algorithm_results))
             for j in range(len(self.expectedResults)):
-                if (self.Hypotheses[j] != self.expectedResults[j]): #if the hypothesis differs from the expected result, increase the error
+                if (algorithm_results[j] != self.expectedResults[j]): #if the hypothesis differs from the expected result, increase the error
                     error += self.weights[j]
+            print(error)
             if (error >= 0.5):
                 self.m -= 1
                 break
-            for i in range(self.expectedResults): #change weights based on the errors
-                    if (self.Hypotheses[j] == self.expectedResults[j]):
+            for i in range(len(self.expectedResults)): #change weights based on the errors
+                    if (algorithm_results[j] == self.expectedResults[j]):
                         if(error != 1):
                             self.weights[i] *= error / (1-error)
             self.normalizeWeights()
-            z = [] 
             for i in range(self.m):
-                if (error != 0):
-                    z.append(0.5*log(1-error/error))
+                if (error != 0 and error != 1):
+                    self.z.append(0.5 * log2((1 - error)/ error))
+                elif error == 0:
+                    self.z.append(1)
                 else:
-                    z.append(1)
+                    self.z.append(0)
             
             self.DatasetReconstruction() #Reconstructs the dataset based on the weight of each example given
         self.Weighted_Majority(z)
     
     def normalizeWeights(self): #function to normalize weights to sum up to 1
-        sum = sum(self.weights)
+        sum_1 = sum(self.weights)
         for weight in self.weights:
-            weight = weight / sum
-        return
+            weight = weight / sum_1
     
     def DatasetReconstruction(self): #differentiation of the training examples based on their weights
         NDataset = []
@@ -87,13 +106,13 @@ class AdaBoost:
             rnum = random.random()
             sum = 0
             ind = 0
-            for j in self.weights:
-                sum += j
-                if (sum >= rnum):
-                    NDataset.append(self.Dataset[ind])
-                    NWeights.append(self.weights[ind])
-                    break
+            print(rnum)
+            while (sum < rnum and sum != 1):
+                sum += self.weights[ind]
                 ind += 1
+            NWeights.append(self.weights[ind - 1])
+            NDataset.append(self.Dataset[ind - 1])
+        print(len(NDataset))
         self.weights = NWeights
         self.Dataset = NDataset
 
@@ -122,14 +141,14 @@ class AdaBoost:
         ig = HC - HC_feature
         return ig
     
-    def Weighted_Majority(self, z):
+    def Weighted_Majority(self):
         Zeros_weight = 0
         Ones_weight = 0
         for i in range(self.m):
             if (self.Hypotheses[i] == 0):
-                Zeros_weight += z[i]
+                Zeros_weight += self.z[i]
             else:
-                Ones_weight += z[i]
+                Ones_weight += self.z[i]
         if (Zeros_weight > Ones_weight):
             return 0
         elif (Ones_weight > Zeros_weight):
@@ -140,5 +159,29 @@ class AdaBoost:
                 return 0
             else:
                 return 1
-
+            
     
+    def predict(self, TestData):
+        sum_0 = 0
+        sum_1 = 0
+        ind = 0
+        for tree in self.Hypotheses:
+            prediction = tree.predict(TestData)
+            if (prediction == 0):
+                sum_0 += self.z[ind]
+            else:
+                sum_1 += self.z[ind]
+            ind += 1
+        if (sum_0 > sum_1):
+                return 0
+        elif (sum_1 > sum_0):
+            return 1
+        else:
+            randomNum = round(random.random())
+            if (randomNum == 0):
+                return 0
+            else:
+                return 1
+            
+
+Ada = AdaBoost
