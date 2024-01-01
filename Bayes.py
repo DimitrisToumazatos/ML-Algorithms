@@ -14,20 +14,17 @@ class NaiveBayes:
     self.prob_pos = 0
     self.prob_neg = 0
 
-  def train(self, pos_filename, neg_filename):
+  def train(self, pos_Data, Pos_Columns, Neg_Data, Neg_Columns):
 
     print("Training has started.")
 
     print("Calculating the probability for the positive training data...")
 
-    df = pd.read_csv(pos_filename, header=None)                     # read the positive training examples
-    nPos = df.shape[0]                                              # shape[0] contains the number of rows of our file
+    nPos = len(pos_Data)
     
-    pos_vocabulary_count = [0 for j in range(df.shape[1])]          # it creates a table of zeros the length of a row
+    pos_vocabulary_count = [0 for j in range(Pos_Columns)]          # it creates a table of zeros the length of a row
     
-    for i in range(nPos):
-      row = [int(x) for x in df.iloc[i, :]]                               # df.iloc function returns the row of our csv that we tell it to give. 
-                                                                          # here we create a table with the elements of each row 
+    for row in pos_Data:
       pos_vocabulary_count = list(map( add, pos_vocabulary_count, row))   # get the count of each word (feature) in the negative examples
     
     self.pos_vocabulary_prob = [x / nPos for x in pos_vocabulary_count]   # calculate the probability of each feature for the positive examples 
@@ -35,22 +32,19 @@ class NaiveBayes:
 
     print("Calculating the probability for the negative training data...")
 
-    df = pd.read_csv(neg_filename, header = None)                         # read the negative training examples
-    nNeg = df.shape[0]    
+    nNeg = len(Neg_Data)  
     
-    neg_vocabulary_count = [0 for j in range(df.shape[1])]                # create a table of zeros the length of a row
+    neg_vocabulary_count = [0 for j in range(Neg_Columns)]                # create a table of zeros the length of a row
 
-    for i in range(nNeg):     
-      row = [int(x) for x in df.iloc[i, :]]                               # create a table with the elements of each row
-      neg_vocabulary_count = list(map( add, neg_vocabulary_count, row))   # get the count of each word (feature) in the negative examples
+    for row  in Neg_Data:  
+      neg_vocabulary_count = list(map(add, neg_vocabulary_count, row))   # get the count of each word (feature) in the negative examples
     
     self.neg_vocabulary_prob = [x / nNeg for x in neg_vocabulary_count]   # calculate the probability of each feature for the negative examples 
 
     self.prob_pos = nPos / (nNeg + nPos)
     self.prob_neg = nNeg / (nNeg + nPos)
 
-
-  def test(self, pos_filename, neg_filename):
+  def test(self, pos_Data, neg_Data):
 
     print("Testing has started.")
     
@@ -58,26 +52,25 @@ class NaiveBayes:
     print("Testing positive test data...")
 
     truePositive = 0
-    df = pd.read_csv(pos_filename, header = None)           # read the positive test data
-
-    numberOfPositive = df.shape[0]
-    for i in range(numberOfPositive):
-      row = [int(x) for x in df.iloc[i, :]]
+    
+    numberOfPositive = len(pos_Data)
+    
+    for row in pos_Data:
       probP = self.prob_pos * self.calculateProb(1, row)    # calculate the probability an example is positive depending on its vector
       probN = self.prob_neg * self.calculateProb(0, row)    # calculate the probability an example is negative depending on its vector
 
       if probP >= probN:
         truePositive += 1
 
+    
 
     print("Testing negative test data...")
 
     trueNegative = 0
-    df = pd.read_csv(neg_filename, header = None)           # read the negative test data
+    
 
-    numberOfNegative = df.shape[0]
-    for i in range(numberOfNegative):
-      row = [int(x) for x in df.iloc[i, :]]
+    numberOfNegative = len(neg_Data)
+    for row in neg_Data:
       probP = self.prob_pos * self.calculateProb(1, row)    # calculate the probability an example is positive depending on its vector
       probN = self.prob_neg * self.calculateProb(0, row)    # calculate the probability an example is negative depending on its vector
         
@@ -118,16 +111,3 @@ class NaiveBayes:
 
     return prob
 
-
-myNaiveBayes = NaiveBayes()
-myNaiveBayes.train("positiveTrain.csv", "negativeTrain.csv")
-
-"""
-with open('myBayes-16k.pkl', 'wb') as outp:            # save object 
-    pickle.dump(myNaiveBayes, outp, pickle.HIGHEST_PROTOCOL) 
-
-with open('myBayes-20k.pkl', 'rb') as inp:             # read saved object
-    myNaiveBayes = pickle.load(inp)
-"""
-
-myNaiveBayes.test("positiveTest.csv", "negativeTest.csv")
