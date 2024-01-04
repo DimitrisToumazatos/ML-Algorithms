@@ -45,7 +45,7 @@ for i in range(sizePos):
     row = [int(x) for x in dfPos.iloc[i, : ]]
     posTestData.append(row)
 
-#Reading of the negative test Data
+#Reading of the negative test Data  
 print("Reading of the negative Test Data!")
 
 dfNeg = pd.read_csv("negativeTest.csv", header = None)

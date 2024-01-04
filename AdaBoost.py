@@ -1,6 +1,7 @@
 from math import log2
 import math
 import random
+import copy
 
 class SingleDepthTree:  #We used the id3 algorithm given from our instructors adapted to create just single depth trees
     def __init__(self, feature):
@@ -57,8 +58,8 @@ class AdaBoost:
         self.MakeHypotheses(features)
     
     def MakeHypotheses(self, features):
-        for i in range(self.m):
-            igs = []
+        for i in range(self.m):   #We use this for loop to create our Hypotheses
+            igs = []            #Here we calculate the igs of all the features 
             for feat_index in features:
                 igs.append(self.InformationGain([example[feat_index] for example in self.Dataset]))
             maxIG = igs.index(max(igs))
@@ -69,8 +70,7 @@ class AdaBoost:
             for row in self.Dataset:
                 algorithm_results.append(SDT.predict(row))
             error = 0
-            print(len(self.expectedResults))
-            print(len(algorithm_results))
+            
             for j in range(len(self.expectedResults)):
                 if (algorithm_results[j] != self.expectedResults[j]): #if the hypothesis differs from the expected result, increase the error
                     error += self.weights[j]
@@ -78,10 +78,10 @@ class AdaBoost:
             if (error >= 0.5):
                 self.m -= 1
                 break
-            for i in range(len(self.expectedResults)): #change weights based on the errors
+            for j in range(len(self.expectedResults)): #change weights based on the errors
                     if (algorithm_results[j] == self.expectedResults[j]):
                         if(error != 1):
-                            self.weights[i] *= error / (1-error)
+                            self.weights[j] *= error / (1-error)
             self.normalizeWeights()
             for i in range(self.m):
                 if (error != 0 and error != 1):
@@ -90,33 +90,40 @@ class AdaBoost:
                     self.z.append(1)
                 else:
                     self.z.append(0)
-            
+            print(len(self.Dataset))
             self.DatasetReconstruction() #Reconstructs the dataset based on the weight of each example given
-        self.Weighted_Majority(z)
+            print(len(self.Dataset))
+        self.Weighted_Majority()
     
     def normalizeWeights(self): #function to normalize weights to sum up to 1
         sum_1 = sum(self.weights)
         for weight in self.weights:
             weight = weight / sum_1
     
-    def DatasetReconstruction(self): #differentiation of the training examples based on their weights
+    def DatasetReconstruction(self): #differentiation of the training examples based on their weights     
         NDataset = []
         NWeights = []
+        NExpected_Results = []
         for i in range(len(self.weights)):
             rnum = random.random()
-            sum = 0
+            sum_1 = 0
             ind = 0
-            print(rnum)
-            while (sum < rnum and sum != 1):
-                sum += self.weights[ind]
+            for j in self.weights:
+                if (sum_1 >= rnum):
+                    NDataset.append(self.Dataset[ind])
+                    NWeights.append(self.weights[ind])
+                    NExpected_Results.append(self.expectedResults[ind])
+                    break
+                sum_1 += j
                 ind += 1
-            NWeights.append(self.weights[ind - 1])
-            NDataset.append(self.Dataset[ind - 1])
-        print(len(NDataset))
+            if (sum_1 == 1):
+                NDataset.append(self.Dataset[-1])
+                NWeights.append(self.weights[-1])
+                NExpected_Results.append(self.expectedResults[-1])
         self.weights = NWeights
         self.Dataset = NDataset
 
-    def InformationGain(self, feature): #given a feature calcuate the information gain
+    def InformationGain(self, feature): #given a feature calculate the information gain
         classes = [0, 1]
         HC = 0
         
@@ -182,6 +189,3 @@ class AdaBoost:
                 return 0
             else:
                 return 1
-            
-
-Ada = AdaBoost
