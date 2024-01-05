@@ -90,4 +90,3 @@ with open('myBayes-130-1700.pkl', 'rb') as inp:
 
 
 myNaiveBayes.test(posTestData, negTestData)"""
-

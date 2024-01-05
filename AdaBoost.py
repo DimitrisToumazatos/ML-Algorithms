@@ -1,7 +1,7 @@
 from math import log2
 import math
 import random
-import copy
+from decimal import Decimal, getcontext
 
 class SingleDepthTree:  #We used the id3 algorithm given from our instructors adapted to create just single depth trees
     def __init__(self, feature):
@@ -70,7 +70,6 @@ class AdaBoost:
             for row in self.Dataset:
                 algorithm_results.append(SDT.predict(row))
             error = 0
-            
             for j in range(len(self.expectedResults)):
                 if (algorithm_results[j] != self.expectedResults[j]): #if the hypothesis differs from the expected result, increase the error
                     error += self.weights[j]
@@ -79,7 +78,7 @@ class AdaBoost:
                 self.m -= 1
                 break
             for j in range(len(self.expectedResults)): #change weights based on the errors
-                    if (algorithm_results[j] == self.expectedResults[j]):
+                    if (algorithm_results[j] == self.expectedResults[j]):  #Προβλημα
                         if(error != 1):
                             self.weights[j] *= error / (1-error)
             self.normalizeWeights()
@@ -88,40 +87,37 @@ class AdaBoost:
                     self.z.append(0.5 * log2((1 - error)/ error))
                 elif error == 0:
                     self.z.append(1)
-                else:
-                    self.z.append(0)
             print(len(self.Dataset))
             self.DatasetReconstruction() #Reconstructs the dataset based on the weight of each example given
             print(len(self.Dataset))
-        self.Weighted_Majority()
     
     def normalizeWeights(self): #function to normalize weights to sum up to 1
         sum_1 = sum(self.weights)
-        for weight in self.weights:
-            weight = weight / sum_1
+        self.weights = [x / sum_1 for x in self.weights]
     
     def DatasetReconstruction(self): #differentiation of the training examples based on their weights     
+        sums = []
+        sum_1 = 0
+        for i in self.weights:
+            sum_1 += i
+            sums.append(sum_1)
+        print(sums[-1])
         NDataset = []
         NWeights = []
         NExpected_Results = []
         for i in range(len(self.weights)):
-            rnum = random.random()
-            sum_1 = 0
+            rnum = random.uniform(0, sums[-1])
             ind = 0
-            for j in self.weights:
-                if (sum_1 >= rnum):
+            for j in sums:
+                if (j >= rnum):
                     NDataset.append(self.Dataset[ind])
                     NWeights.append(self.weights[ind])
                     NExpected_Results.append(self.expectedResults[ind])
                     break
-                sum_1 += j
                 ind += 1
-            if (sum_1 == 1):
-                NDataset.append(self.Dataset[-1])
-                NWeights.append(self.weights[-1])
-                NExpected_Results.append(self.expectedResults[-1])
         self.weights = NWeights
         self.Dataset = NDataset
+        self.expectedResults = NExpected_Results
 
     def InformationGain(self, feature): #given a feature calculate the information gain
         classes = [0, 1]
@@ -147,25 +143,6 @@ class AdaBoost:
 
         ig = HC - HC_feature
         return ig
-    
-    def Weighted_Majority(self):
-        Zeros_weight = 0
-        Ones_weight = 0
-        for i in range(self.m):
-            if (self.Hypotheses[i] == 0):
-                Zeros_weight += self.z[i]
-            else:
-                Ones_weight += self.z[i]
-        if (Zeros_weight > Ones_weight):
-            return 0
-        elif (Ones_weight > Zeros_weight):
-            return 1
-        else:
-            randomNum = round(random.random())
-            if (randomNum == 0):
-                return 0
-            else:
-                return 1
             
     
     def predict(self, TestData):
