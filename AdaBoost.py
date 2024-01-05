@@ -1,7 +1,5 @@
-from math import log2
 import math
 import random
-from decimal import Decimal, getcontext
 
 class SingleDepthTree:  #We used the id3 algorithm given from our instructors adapted to create just single depth trees
     def __init__(self, feature):
@@ -63,28 +61,27 @@ class AdaBoost:
             for feat_index in features:
                 igs.append(self.InformationGain([example[feat_index] for example in self.Dataset]))
             maxIG = igs.index(max(igs))
-            SDT = SingleDepthTree(maxIG)
+            SDT = SingleDepthTree(features[maxIG])
             self.Hypotheses.append(SDT)
-            SDT.fit(self.Dataset, self.expectedResults)
+            self.Hypotheses[-1].fit(self.Dataset, self.expectedResults)
             algorithm_results = []
             for row in self.Dataset:
-                algorithm_results.append(SDT.predict(row))
+                algorithm_results.append(self.Hypotheses[-1].predict(row))
             error = 0
             for j in range(len(self.expectedResults)):
                 if (algorithm_results[j] != self.expectedResults[j]): #if the hypothesis differs from the expected result, increase the error
                     error += self.weights[j]
-            print(error)
+            print("error " + str(error))
             if (error >= 0.5):
                 self.m -= 1
                 break
             for j in range(len(self.expectedResults)): #change weights based on the errors
-                    if (algorithm_results[j] == self.expectedResults[j]):  #Προβλημα
-                        if(error != 1):
-                            self.weights[j] *= error / (1-error)
+                if(error != 1):
+                    self.weights[j] *= error / (1-error)
             self.normalizeWeights()
             for i in range(self.m):
                 if (error != 0 and error != 1):
-                    self.z.append(0.5 * log2((1 - error)/ error))
+                    self.z.append(0.5 * math.log2((1 - error)/ error))
                 elif error == 0:
                     self.z.append(1)
             print(len(self.Dataset))
@@ -101,15 +98,15 @@ class AdaBoost:
         for i in self.weights:
             sum_1 += i
             sums.append(sum_1)
-        print(sums[-1])
+        print("sum[-1] "+ str(sums[-1]))
         NDataset = []
         NWeights = []
         NExpected_Results = []
         for i in range(len(self.weights)):
-            rnum = random.uniform(0, sums[-1])
+            rNum = random.uniform(0, sums[-1])
             ind = 0
             for j in sums:
-                if (j >= rnum):
+                if (j >= rNum):
                     NDataset.append(self.Dataset[ind])
                     NWeights.append(self.weights[ind])
                     NExpected_Results.append(self.expectedResults[ind])
@@ -157,7 +154,7 @@ class AdaBoost:
                 sum_1 += self.z[ind]
             ind += 1
         if (sum_0 > sum_1):
-                return 0
+            return 0
         elif (sum_1 > sum_0):
             return 1
         else:
