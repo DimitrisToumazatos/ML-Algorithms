@@ -6,7 +6,7 @@ import copy
 PosTrainData = []
 NegTrainData = []
 #Reading of the Positive Training Data
-print("Reading the positive training data!")
+print("Reading of the positive training data!")
 
 dfPos = pd.read_csv("positiveTrain.csv", header = None)     # read the positive training examples
 sizePos = dfPos.shape[0]        # shape[0] contains the number of rows of our file
@@ -25,6 +25,17 @@ for i in range(sizeNeg):
     row = [int(x) for x in dfNeg.iloc[i, : ]]
     NegTrainData.append(row)
 
+Train_Data = copy.deepcopy(PosTrainData)
+for row in NegTrainData:
+    Train_Data.append(row)
+results = []
+for i in range(len(PosTrainData)):
+    results.append(1)
+for i in range(len(NegTrainData)):
+    results.append(0)
+sdt = SingleDepthTree()
+Ada = AdaBoost(Train_Data, sdt, 10)
+Ada.fit(Train_Data, results)
 
 """
 myNaiveBayes = NaiveBayes()
@@ -32,7 +43,7 @@ myNaiveBayes.train(PosTrainData, dfPos.shape[1], NegTrainData, dfNeg.shape[1])
 
 with open('myBayes-130-1700.pkl', 'wb') as outp:
     pickle.dump(myNaiveBayes, outp, pickle.HIGHEST_PROTOCOL)
-
+"""
 posTestData = []
 negTestData = []
 #Reading of the Positive Test Data
@@ -45,6 +56,14 @@ for i in range(sizePos):
     row = [int(x) for x in dfPos.iloc[i, : ]]
     posTestData.append(row)
 
+correct = 0
+for row in posTestData:
+    res = Ada.predict(row)
+    if (res == 1):
+        correct += 1
+
+print("The accuracy for the positive test data was " + str(correct / len(posTestData)))
+
 #Reading of the negative test Data  
 print("Reading of the negative Test Data!")
 
@@ -54,29 +73,14 @@ sizeNeg = dfNeg.shape[0]
 for i in range(sizeNeg):
     row = [int(x) for x in dfNeg.iloc[i, : ]]
     negTestData.append(row)
-"""
-Train_Data = copy.deepcopy(PosTrainData)
-for row in NegTrainData:
-    Train_Data.append(row)
-results = []
-for i in range(len(PosTrainData)):
-    results.append(1)
-for i in range(len(NegTrainData)):
-    results.append(0)
 
-Ada = AdaBoost(Train_Data, results, 10)
-Ada.fit()
+correct = 0
+for row in negTestData:
+    res = Ada.predict(row)
+    if (res == 0):
+        correct += 1
 
-
-
-
-
-
-
-
-
-
-
+print("The accuracy for the negative test data was " + str(correct / len(negTestData)))
 
 
 
