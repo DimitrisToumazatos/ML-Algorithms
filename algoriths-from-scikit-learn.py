@@ -2,6 +2,10 @@ import copy
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier
+
+
+k = 10000 # Number of examples from 1 category
 
 ########## Read Train Data ##########
 
@@ -28,17 +32,12 @@ for i in range(sizeNeg):
     row = [int(x) for x in dfNeg.iloc[i, : ]]
     negTrainData.append(row)
 
-trainData = copy.deepcopy(posTrainData)
-resultsTrain = []
+trainData = copy.deepcopy(posTrainData[:k])
+resultsTrain = [1]*k
 
-for row in negTrainData:
-    trainData.append(row)
+trainData += negTrainData[:k]
 
-for i in range(len(posTrainData)):
-    resultsTrain.append(1)
-for i in range(len(negTrainData)):
-    resultsTrain.append(0)
-
+resultsTrain += [0]*k
 
 
 ######### Read Test Data ############
@@ -81,18 +80,17 @@ for i in range(numberOfNegative):
     resultsTest.append(0)
 
 
-
-
-k = 20000
+###############################################################################################
+    
+########################## Bayes ##################################################3
+"""
+X_train, X_test, y_train, y_test = trainData, testData, resultsTrain, resultsTest
+gnb = GaussianNB()
+y_pred = gnb.fit(X_train, y_train).predict(X_test)
 
 ###### Test Data Test ######
 
 print("\nTest Data Results \n")
-X_train, X_test, y_train, y_test = trainData[:k], testData[:k], resultsTrain[:k], resultsTest[:k]
-gnb = GaussianNB()
-y_pred = gnb.fit(X_train, y_train).predict(X_test)
-
-print("Number of mislabeled points out of a total %d points: %d"% (len(X_test), (y_test == y_pred).sum()))
 
 truePositive = (y_test[:sizePos] == y_pred[:sizePos]).sum()
 trueNegative = (y_test[sizePos:] == y_pred[sizePos:]).sum()
@@ -117,11 +115,42 @@ print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/preci
 
 ##### Train Data Test #######
 print("\nTrain Data Results \n")
-X_train, X_test, y_train, y_test = trainData[:k], trainData[:k], resultsTrain[:k], resultsTrain[:k]
+X_train, X_test, y_train, y_test = trainData, trainData, resultsTrain, resultsTrain
 gnb = GaussianNB()
 y_pred = gnb.fit(X_train, y_train).predict(X_test)
 
-print("Number of mislabeled points out of a total %d points: %d"% (len(X_test), (y_test == y_pred).sum()))
+truePositive = (y_test[:k] == y_pred[:k]).sum()
+trueNegative = (y_test[k:] == y_pred[k:]).sum()
+falsePositive = k - trueNegative
+falseNegative = k - truePositive
+
+# print train statistics
+print("True Positive: " + str(truePositive))
+print("False Positive: " + str(falsePositive))
+print("True Negative: " + str(trueNegative))
+print("False Negative: " + str(falseNegative))
+print("The accuracy for the positive data is: " + str(round(((truePositive/k)), 3)))
+print("The accuracy for the negative data is: " + str(round(((trueNegative/k)), 3)))
+print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(k + k))), 3)))  
+precision = round((truePositive/(truePositive+falsePositive)), 3)
+print("For the positive data the precision is: " + str(precision))  
+recall =  round((truePositive/(truePositive+falseNegative)), 3)
+print("For the positive data the recall is: " + str(recall))    
+print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/precision), 3)))  
+
+"""
+###########################################################################################################
+
+###########3 Random Forest #######################################################
+
+X, y = trainData, resultsTrain
+clf = RandomForestClassifier(max_depth=2, random_state=0)
+clf.fit(X, y)
+y_pred = clf.predict(testData)
+y_test = resultsTest
+###### Test Data Test ######
+
+print("\nTest Data Results \n")
 
 truePositive = (y_test[:sizePos] == y_pred[:sizePos]).sum()
 trueNegative = (y_test[sizePos:] == y_pred[sizePos:]).sum()
@@ -144,10 +173,28 @@ print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/preci
 
 
 
+##### Train Data Test #######
+print("\nTrain Data Results \n")
+X_train, X_test, y_train, y_test = trainData, trainData, resultsTrain, resultsTrain
+gnb = GaussianNB()
+y_pred = gnb.fit(X_train, y_train).predict(X_test)
 
+truePositive = (y_test[:k] == y_pred[:k]).sum()
+trueNegative = (y_test[k:] == y_pred[k:]).sum()
+falsePositive = k - trueNegative
+falseNegative = k - truePositive
 
-
-
-
-
+# print train statistics
+print("True Positive: " + str(truePositive))
+print("False Positive: " + str(falsePositive))
+print("True Negative: " + str(trueNegative))
+print("False Negative: " + str(falseNegative))
+print("The accuracy for the positive data is: " + str(round(((truePositive/k)), 3)))
+print("The accuracy for the negative data is: " + str(round(((trueNegative/k)), 3)))
+print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(k + k))), 3)))  
+precision = round((truePositive/(truePositive+falsePositive)), 3)
+print("For the positive data the precision is: " + str(precision))  
+recall =  round((truePositive/(truePositive+falseNegative)), 3)
+print("For the positive data the recall is: " + str(recall))    
+print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/precision), 3)))  
 
