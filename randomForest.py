@@ -109,7 +109,8 @@ class RandomForest:
 
         falsePositive = totalNegTests-trueNegative
         falseNegative = totalPosTests-truePositive
-        # print statostics
+
+        # print statistics
         print("True Positive: " + str(truePositive))                      
         print("False Positive: " + str(falsePositive))
         print("True Negative: " + str(trueNegative))
@@ -121,15 +122,15 @@ class RandomForest:
         print("The recall for the negative test data is: " + str(round(((trueNegative/(trueNegative+falsePositive)) * 100), 2)))  
         
 
-myRandomForest = RandomForest(301, 40)                               # create object
+myRandomForest = RandomForest(101, 4)                               # create object
 myRandomForest.train("positiveTrain.csv", "negativeTrain.csv")                 # train model
 
 
 print("Save model...")
-
+"""
 with open('myRandomForest-301-40.pkl', 'wb') as outp:            # save object 
     pickle.dump(myRandomForest, outp, pickle.HIGHEST_PROTOCOL) 
-"""
+
 with open('myRandomForest-301-40-20k.pkl', 'rb') as inp:             # read saved object
     myRandomForest = pickle.load(inp)
 """
