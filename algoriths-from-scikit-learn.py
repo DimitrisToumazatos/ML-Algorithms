@@ -104,14 +104,14 @@ print("True Positive: " + str(truePositive))
 print("False Positive: " + str(falsePositive))
 print("True Negative: " + str(trueNegative))
 print("False Negative: " + str(falseNegative))
-print("The accuracy for the positive data is: " + str(round(((truePositive/numberOfPositive) * 100), 2)))   # 84.58 
-print("The accuracy for the negative data is: " + str(round(((trueNegative/numberOfNegative) * 100), 2)))  # 78.3
-print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(numberOfNegative + numberOfPositive)) * 100), 2)))  
-precision = round((truePositive/(truePositive+falsePositive) * 100), 2)
+print("The accuracy for the positive data is: " + str(round(((truePositive/numberOfPositive)), 3)))
+print("The accuracy for the negative data is: " + str(round(((trueNegative/numberOfNegative)), 3)))
+print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(numberOfNegative + numberOfPositive))), 3)))  
+precision = round((truePositive/(truePositive+falsePositive)), 3)
 print("For the positive data the precision is: " + str(precision))  
-recall =  round((truePositive/(truePositive+falseNegative)) * 100, 2)
+recall =  round((truePositive/(truePositive+falseNegative)), 3)
 print("For the positive data the recall is: " + str(recall))    
-print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/precision), 2)))  
+print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/precision), 3)))  
 
 
 
@@ -133,14 +133,14 @@ print("True Positive: " + str(truePositive))
 print("False Positive: " + str(falsePositive))
 print("True Negative: " + str(trueNegative))
 print("False Negative: " + str(falseNegative))
-print("The accuracy for the positive data is: " + str(round(((truePositive/numberOfPositive) * 100), 2)))
-print("The accuracy for the negative data is: " + str(round(((trueNegative/numberOfNegative) * 100), 2)))
-print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(numberOfNegative + numberOfPositive)) * 100), 2)))  
-precision = round((truePositive/(truePositive+falsePositive) * 100), 2)
+print("The accuracy for the positive data is: " + str(round(((truePositive/numberOfPositive)), 3)))
+print("The accuracy for the negative data is: " + str(round(((trueNegative/numberOfNegative)), 3)))
+print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(numberOfNegative + numberOfPositive))), 3)))  
+precision = round((truePositive/(truePositive+falsePositive)), 3)
 print("For the positive data the precision is: " + str(precision))  
-recall =  round((truePositive/(truePositive+falseNegative)) * 100, 2)
+recall =  round((truePositive/(truePositive+falseNegative)), 3)
 print("For the positive data the recall is: " + str(recall))    
-print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/precision), 2)))  
+print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/precision), 3)))  
 
 
 
