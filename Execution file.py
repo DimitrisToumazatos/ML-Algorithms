@@ -33,8 +33,7 @@ for i in range(len(PosTrainData)):
     results.append(1)
 for i in range(len(NegTrainData)):
     results.append(0)
-sdt = SingleDepthTree()
-Ada = AdaBoost(Train_Data, sdt, 10)
+Ada = AdaBoost(Train_Data, 500)
 Ada.fit(Train_Data, results)
 
 """
@@ -56,13 +55,13 @@ for i in range(sizePos):
     row = [int(x) for x in dfPos.iloc[i, : ]]
     posTestData.append(row)
 
+res = Ada.predict(posTestData)
 correct = 0
-for row in posTestData:
-    res = Ada.predict(row)
-    if (res == 1):
+for i in res:
+    if (i == 1):
         correct += 1
 
-print("The accuracy for the positive test data was " + str(correct / len(posTestData)))
+print("The accuracy for the positive test data was " + str(correct / len(res)))
 
 #Reading of the negative test Data  
 print("Reading of the negative Test Data!")
@@ -74,10 +73,10 @@ for i in range(sizeNeg):
     row = [int(x) for x in dfNeg.iloc[i, : ]]
     negTestData.append(row)
 
+res = Ada.predict(negTestData)
 correct = 0
-for row in negTestData:
-    res = Ada.predict(row)
-    if (res == 0):
+for i in res:
+    if (i == 0):
         correct += 1
 
 print("The accuracy for the negative test data was " + str(correct / len(negTestData)))
