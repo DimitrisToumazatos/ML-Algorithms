@@ -60,6 +60,7 @@ class SingleDepthTree:
             count_1_negative = 0
             count_0_negative = 0
 
+            #calculate the counters values
             for j in range(len(x_train)):
                 if(y_train[j] == 1):
                     if(x_train[j][i] == 1):
@@ -122,9 +123,9 @@ class AdaBoost:
         self.m = M
 
     def fit(self, x_train, y_train): 
-        self.W = [1 / len(self.Dataset) for _ in range(len(self.Dataset))]
-        self.h_t = []
-        self.z = []
+        self.W = [1 / len(self.Dataset) for _ in range(len(self.Dataset))]  #the initialization of the weights list
+        self.h_t = []       #the initialization of the hypotheses list
+        self.z = []     #the initialization of the hypotheses weights list
         self.keys = [i for i in range(1570)]
         self.keys.remove(637)
         self.keys.remove(742)
@@ -136,7 +137,6 @@ class AdaBoost:
         for i in range(self.m - 1):
             ht = SingleDepthTree()
             ht.fit(self.W, x_train, y_train, self.keys)
-            print(ht.feature)
             self.h_t.append(ht)
             self.keys.remove(ht.feature)
             algorithm_results = ht.predict(x_train)
