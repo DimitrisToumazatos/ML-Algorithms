@@ -49,7 +49,7 @@ negTestData = []
 #Reading of the Positive Test Data
 print("Reading the positive test data!")
 
-dfPos = pd.read_csv("positiveDev.csv", header = None)     # read the positive test examples
+dfPos = pd.read_csv("positiveTest.csv", header = None)     # read the positive test examples
 sizePos = dfPos.shape[0]                                  # shape[0] contains the number of rows of our file
 
 for i in range(sizePos):
@@ -59,7 +59,7 @@ for i in range(sizePos):
 #Reading of the Negative Test Data
 print("Reading the negative test data!")
 
-dfNeg = pd.read_csv("negativeDev.csv", header = None)     # read the negative test examples
+dfNeg = pd.read_csv("negativeTest.csv", header = None)     # read the negative test examples
 sizeNeg = dfNeg.shape[0]                                  # shape[0] contains the number of rows of our file
 
 for i in range(sizeNeg):
@@ -83,7 +83,71 @@ for i in range(numberOfNegative):
 
 
 
-X_train, X_test, y_train, y_test = trainData, testData, resultsTrain, resultsTest
+k = 20000
+
+###### Test Data Test ######
+
+print("\nTest Data Results \n")
+X_train, X_test, y_train, y_test = trainData[:k], testData[:k], resultsTrain[:k], resultsTest[:k]
 gnb = GaussianNB()
 y_pred = gnb.fit(X_train, y_train).predict(X_test)
-print("Number of mislabeled points out of a total %d points : %d"% (X_test.shape[0], (y_test != y_pred).sum()))
+
+print("Number of mislabeled points out of a total %d points: %d"% (len(X_test), (y_test == y_pred).sum()))
+
+truePositive = (y_test[:sizePos] == y_pred[:sizePos]).sum()
+trueNegative = (y_test[sizePos:] == y_pred[sizePos:]).sum()
+falsePositive = sizeNeg - trueNegative
+falseNegative = sizePos - truePositive
+
+# print test statistics
+print("True Positive: " + str(truePositive))
+print("False Positive: " + str(falsePositive))
+print("True Negative: " + str(trueNegative))
+print("False Negative: " + str(falseNegative))
+print("The accuracy for the positive data is: " + str(round(((truePositive/numberOfPositive) * 100), 2)))   # 84.58 
+print("The accuracy for the negative data is: " + str(round(((trueNegative/numberOfNegative) * 100), 2)))  # 78.3
+print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(numberOfNegative + numberOfPositive)) * 100), 2)))  
+precision = round((truePositive/(truePositive+falsePositive) * 100), 2)
+print("For the positive data the precision is: " + str(precision))  
+recall =  round((truePositive/(truePositive+falseNegative)) * 100, 2)
+print("For the positive data the recall is: " + str(recall))    
+print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/precision), 2)))  
+
+
+
+##### Train Data Test #######
+print("\nTrain Data Results \n")
+X_train, X_test, y_train, y_test = trainData[:k], trainData[:k], resultsTrain[:k], resultsTrain[:k]
+gnb = GaussianNB()
+y_pred = gnb.fit(X_train, y_train).predict(X_test)
+
+print("Number of mislabeled points out of a total %d points: %d"% (len(X_test), (y_test == y_pred).sum()))
+
+truePositive = (y_test[:sizePos] == y_pred[:sizePos]).sum()
+trueNegative = (y_test[sizePos:] == y_pred[sizePos:]).sum()
+falsePositive = sizeNeg - trueNegative
+falseNegative = sizePos - truePositive
+
+# print test statistics
+print("True Positive: " + str(truePositive))
+print("False Positive: " + str(falsePositive))
+print("True Negative: " + str(trueNegative))
+print("False Negative: " + str(falseNegative))
+print("The accuracy for the positive data is: " + str(round(((truePositive/numberOfPositive) * 100), 2)))
+print("The accuracy for the negative data is: " + str(round(((trueNegative/numberOfNegative) * 100), 2)))
+print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(numberOfNegative + numberOfPositive)) * 100), 2)))  
+precision = round((truePositive/(truePositive+falsePositive) * 100), 2)
+print("For the positive data the precision is: " + str(precision))  
+recall =  round((truePositive/(truePositive+falseNegative)) * 100, 2)
+print("For the positive data the recall is: " + str(recall))    
+print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/precision), 2)))  
+
+
+
+
+
+
+
+
+
+

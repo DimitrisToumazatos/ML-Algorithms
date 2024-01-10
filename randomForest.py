@@ -109,7 +109,8 @@ class RandomForest:
 
         falsePositive = totalNegTests-trueNegative
         falseNegative = totalPosTests-truePositive
-        # print statostics
+
+        # print statistics
         print("True Positive: " + str(truePositive))                      
         print("False Positive: " + str(falsePositive))
         print("True Negative: " + str(trueNegative))
