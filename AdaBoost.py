@@ -25,6 +25,7 @@ class SingleDepthTree:
         count_1_negative = 0
         count_0_negative = 0
 
+        #the calculation of all the counters
         for j in range(len(x_train)):
             if(y_train[j] == 1):
                 if(x_train[j][self.feature] == 1):
@@ -45,12 +46,24 @@ class SingleDepthTree:
         pC1X1 = 0
         if (count_1_positive + count_1_negative != 0):
             pC1X1 = float(count_0_positive / (count_0_positive + count_0_negative))
-        if (pC1X0 > (1 - pC1X0)):
-            self.category_0 = 1
+        maxPc = max(pC1X0, 1 - pC1X0)
+        if (maxPc > max(pC1X1, 1 - pC1X1)):
+            if (pC1X0 > 1 - pC1X0):
+                self.category_0 = 1
+            else:
+                self.category_0 = 0
+            self.category_1 = abs(self.category_0 - 1)
         else:
-            self.category_0 = 0
-        self.category_1 = abs(1 - self.category_0)
-    
+            if(pC1X1 > 1 - pC1X1):
+                self.category_1 = 1
+            else:
+                self.category_1 = 0
+            self.category_0 = abs(self.category_1 - 1)
+
+    def giniIndex(self, x_train, y_train, weights, keys):
+
+        self, x_train, y_train, weights, keys
+    """ 
     def bestKey(self, x_train, y_train, weights, keys):
         gains = []
 
@@ -101,7 +114,7 @@ class SingleDepthTree:
             return 0
         else:
             return - (prob * math.log2(prob)) - ((1-prob)*math.log2(1-prob))
-
+    """
     def predict_row(self, row):
         if (row[self.feature] == 0):
             return self.category_0
@@ -122,44 +135,37 @@ class AdaBoost:
         self.Dataset = Dataset_x
         self.m = M
 
-    def fit(self, x_train, y_train): 
+    def fit(self,  y_train): 
         self.W = [1 / len(self.Dataset) for _ in range(len(self.Dataset))]  #the initialization of the weights list
         self.h_t = []       #the initialization of the hypotheses list
         self.z = []     #the initialization of the hypotheses weights list
         self.keys = [i for i in range(1570)]
-        self.keys.remove(637)
-        self.keys.remove(742)
-        self.keys.remove(419)
-        self.keys.remove(268)
-        self.keys.remove(598)
-        self.keys.remove(703)
-        self.keys.remove(361)
-        for i in range(self.m - 1):
+        i = 0
+        while (i < self.m):
             ht = SingleDepthTree()
-            ht.fit(self.W, x_train, y_train, self.keys)
+            ht.fit(self.W, self.Dataset, y_train, self.keys)
             self.h_t.append(ht)
             self.keys.remove(ht.feature)
-            algorithm_results = ht.predict(x_train)
+            print(len(self.keys))
+            algorithm_results = ht.predict(self.Dataset)
             error = 0
             for j in range(len(y_train)):
                 if(y_train[j] != algorithm_results[j]):
                     error += self.W[j]
-            print(error)
-            if (round(error, 2) > 0.51):
-                self.m = i - 1
-                break
-            elif (error <= 0.001):
-                self.m = i
-                break
-            if (error != 0 and error != 1):
-                self.z.append(0.5 * log2((1 - error)/ error))
-            elif error == 0:
-                self.z.append(1)
+            error = error / sum(self.W)
+            if (round(error, 4) >= 0.5105):
+                self.h_t.remove(ht)
+                continue
             for j in range(len(y_train)): #change weights based on the errors
                     if (algorithm_results[j] == y_train[j]):
                         if(error != 1):
                             self.W[j] *= (error / (1 - error))
             self.normalizeWeights()
+            if (error != 0 and error != 1):
+                self.z.append(0.5 * log2((1 - error)/ error))
+            elif error == 0:
+                self.z.append(1)
+            i += 1
 
     def normalizeWeights(self): #function to normalize weights to sum up to 1
         sum_1 = sum(self.W)
@@ -174,13 +180,11 @@ class AdaBoost:
             index = 0
             for h in self.h_t:
                 prediction = h.predict_row(row)
-                if (prediction == 0):
+                if (prediction == 0):       #prediction is the return categorization of the given row from the tree
                     sum_0 += self.z[index]
                 else:
                     sum_1 += self.z[index]
                 index += 1
-                if(index == len(self.z)):
-                    break
             if (sum_0 > sum_1):
                 results.append(0)
             elif (sum_1 > sum_0):
