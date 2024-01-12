@@ -34,8 +34,8 @@ for i in range(len(PosTrainData)):
 for i in range(len(NegTrainData)):
     results.append(0)
 
-Ada = AdaBoost(Train_Data, 20)
-Ada.fit(results)
+Ada = AdaBoost(10)
+Ada.fit(Train_Data, results)
 
 PosTestData = []
 NegTestData = []
@@ -67,7 +67,7 @@ myNaiveBayes.train(PosTrainData, dfPos.shape[1], NegTrainData, dfNeg.shape[1])
 with open('myBayes-130-1700.pkl', 'wb') as outp:
     pickle.dump(myNaiveBayes, outp, pickle.HIGHEST_PROTOCOL)
 """
-testData = copy.deepcopy(PosTestData)
+"""testData = copy.deepcopy(PosTestData)
 for row in NegTestData:
     testData.append(row)
 
@@ -78,7 +78,7 @@ for i in range(numberOfPositive):
     results.append(1)
 for i in range(numberOfNegative):
     results.append(0)
-
+"""
 
 res = Ada.predict(PosTestData)
 correct = 0
@@ -86,7 +86,7 @@ for i in res:
     if (i == 1):
         correct += 1
 
-print("The accuracy for the positive test data was " + str(correct / len(res)))
+print("The accuracy for the positive test data was " + str(correct / len(PosTestData)))
 
 res = Ada.predict(NegTestData)
 correct = 0
@@ -94,7 +94,8 @@ for i in res:
     if (i == 0):
         correct += 1
 
-print("The accuracy for the positive test data was " + str(correct / len(res)))
+
+print("The accuracy for the negative test data was " + str(correct / len(NegTestData)))
 """
 print("Save model...")
 
