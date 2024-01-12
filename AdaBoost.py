@@ -19,7 +19,7 @@ class SingleDepthTree:
         
     
     def fit(self, weights, x_train, y_train, keys):
-        self.feature = self.bestKey(x_train, y_train, weights, keys)
+        self.feature = self.giniIndex(x_train, y_train, weights, keys)
         count_1_positive = 0
         count_0_positive = 0
         count_1_negative = 0
@@ -31,41 +31,47 @@ class SingleDepthTree:
                 if(x_train[j][self.feature] == 1):
                     count_1_positive += weights[j]
                 else:
-                    count_1_negative += weights[j]
-            else:
-                if(x_train[j][self.feature] == 1):
                     count_0_positive += weights[j]
-                else:
+            else:
+                if(x_train[j][self.feature] == 0):
                     count_0_negative += weights[j]
+                else:
+                    count_1_negative += weights[j]
         
         #prob (C = 1 | X = 0)
         pC1X0 = 0
-        if (count_1_positive + count_1_negative != 0):
-            pC1X0 = float(count_1_positive / (count_1_positive + count_1_negative))
+        if (count_0_positive + count_0_negative != 0):
+            pC1X0 = float(count_0_positive / (count_0_positive + count_0_negative))
         #prob (C = 1 | X = 1)
         pC1X1 = 0
         if (count_1_positive + count_1_negative != 0):
-            pC1X1 = float(count_0_positive / (count_0_positive + count_0_negative))
-        maxPc = max(pC1X0, 1 - pC1X0)
-        if (maxPc > max(pC1X1, 1 - pC1X1)):
-            if (pC1X0 > 1 - pC1X0):
-                self.category_0 = 1
-            else:
-                self.category_0 = 0
-            self.category_1 = abs(self.category_0 - 1)
+            pC1X1 = float(count_1_positive / (count_1_positive + count_1_negative))
+        if (pC1X0 > 1 - pC1X0):
+            self.category_0 = 1
+        elif (pC1X0 < 1 - pC1X0):
+            self.category_0 = 0
         else:
-            if(pC1X1 > 1 - pC1X1):
-                self.category_1 = 1
+            randomNum = round(random.random())
+            if (randomNum == 0):
+                self.category_0 = 0
             else:
+                self.category_0 = 1
+            
+        if (pC1X1 > 1 - pC1X1):
+            self.category_1 = 1
+        elif (pC1X1 < 1 - pC1X1):
+            self.category_1 = 0
+        else:
+            randomNum = round(random.random())
+            if (randomNum == 0):
                 self.category_1 = 0
-            self.category_0 = abs(self.category_1 - 1)
+            else:
+                self.category_1 = 1
+
 
     def giniIndex(self, x_train, y_train, weights, keys):
+        GiniIndex = []
 
-        self, x_train, y_train, weights, keys
-    """ 
-    def bestKey(self, x_train, y_train, weights, keys):
-        gains = []
 
         for i in keys:
             count_1_positive = 0
@@ -73,48 +79,37 @@ class SingleDepthTree:
             count_1_negative = 0
             count_0_negative = 0
 
-            #calculate the counters values
+            #the calculation of all the counters
             for j in range(len(x_train)):
                 if(y_train[j] == 1):
                     if(x_train[j][i] == 1):
                         count_1_positive += weights[j]
                     else:
-                        count_1_negative += weights[j]
-                else:
-                    if(x_train[j][i] == 1):
                         count_0_positive += weights[j]
-                    else:
+                else:
+                    if(x_train[j][i] == 0):
                         count_0_negative += weights[j]
+                    else:
+                        count_1_negative += weights[j]
             
-            #prob C = 1
-            pC1 = (count_1_positive + count_0_positive) / sum(weights)
             #prob (C = 1 | X = 0)
             pC1X0 = 0
-            if (count_1_positive + count_1_negative != 0):
-                pC1X0 = float(count_1_positive / (count_1_positive + count_1_negative))
+            if (count_0_positive + count_0_negative != 0):
+                pC1X0 = float(count_0_positive / (count_0_positive + count_0_negative))
             #prob (C = 1 | X = 1)
             pC1X1 = 0
             if (count_1_positive + count_1_negative != 0):
-                pC1X1 = float(count_0_positive / (count_0_positive + count_0_negative))
-            #entropies
-            hcX1 = self.binEntropy(pC1X1)
-            hcX0 = self.binEntropy(pC1X0)
+                pC1X1 = float(count_1_positive / (count_1_positive + count_1_negative))
+            giniIndex1 = 1 - (pC1X1 ** 2 + (1 - pC1X1) ** 2)
+            giniIndex0 = 1 - (pC1X0 ** 2 + (1 - pC1X0) ** 2)
+            giniIndex = ((count_0_negative + count_0_positive) * giniIndex0) + ((count_1_negative + count_1_positive) * giniIndex1)
 
-            #Calculate initial binary entropy
-            count_pos = count_0_positive + count_1_positive
-            hc = self.binEntropy(count_pos / len(x_train))
-
-            gains.append(hc - (pC1 * hcX1) - ((1-pC1) * hcX0))
-
-        maxgain = max(gains)
-        return keys[gains.index(maxgain)]
-
-    def binEntropy(self, prob):
-        if (prob == 0 or prob == 1):
-            return 0
-        else:
-            return - (prob * math.log2(prob)) - ((1-prob)*math.log2(1-prob))
-    """
+            GiniIndex.append(giniIndex)
+        
+        maxGini = max(GiniIndex)
+        return keys[GiniIndex.index(maxGini)]
+            
+    
     def predict_row(self, row):
         if (row[self.feature] == 0):
             return self.category_0
@@ -131,11 +126,12 @@ class SingleDepthTree:
         return results
         
 class AdaBoost:
-    def __init__(self, Dataset_x, M):
-        self.Dataset = Dataset_x
+    def __init__(self, M):
+        
         self.m = M
 
-    def fit(self,  y_train): 
+    def fit(self, x_train, y_train):
+        self.Dataset = x_train 
         self.W = [1 / len(self.Dataset) for _ in range(len(self.Dataset))]  #the initialization of the weights list
         self.h_t = []       #the initialization of the hypotheses list
         self.z = []     #the initialization of the hypotheses weights list
@@ -145,26 +141,32 @@ class AdaBoost:
             ht = SingleDepthTree()
             ht.fit(self.W, self.Dataset, y_train, self.keys)
             self.h_t.append(ht)
+            print(ht.feature)
             self.keys.remove(ht.feature)
-            print(len(self.keys))
             algorithm_results = ht.predict(self.Dataset)
             error = 0
             for j in range(len(y_train)):
                 if(y_train[j] != algorithm_results[j]):
                     error += self.W[j]
-            error = error / sum(self.W)
-            if (round(error, 4) >= 0.5105):
+            print(error)
+            if (error >= 0.5):
                 self.h_t.remove(ht)
                 continue
-            for j in range(len(y_train)): #change weights based on the errors
-                    if (algorithm_results[j] == y_train[j]):
-                        if(error != 1):
-                            self.W[j] *= (error / (1 - error))
-            self.normalizeWeights()
-            if (error != 0 and error != 1):
+            if (error != 0):
                 self.z.append(0.5 * log2((1 - error)/ error))
             elif error == 0:
                 self.z.append(1)
+            elif error >= 0.5:
+                self.z.append(0)
+            for j in range(len(y_train)): #change weights based on the errors
+                    if (algorithm_results[j] == y_train[j]):
+                        self.W[j] = self.W[j] * (error / (1 - error))
+                    else:
+                        if (error != 0):
+                            self.W[j] = self.W[j] * ((1 - error) / error)
+
+            self.normalizeWeights()
+            
             i += 1
 
     def normalizeWeights(self): #function to normalize weights to sum up to 1
@@ -173,7 +175,6 @@ class AdaBoost:
 
     def predict(self, TestData):
         results = []
-        print(len(self.h_t))
         for row in TestData:
             sum_0 = 0
             sum_1 = 0
