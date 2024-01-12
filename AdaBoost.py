@@ -1,165 +1,200 @@
-import math
 import random
+from time import sleep
+import pandas as pd
+import numpy as np        
+from math import exp, log2
+import math
 
-class SingleDepthTree:  #We used the id3 algorithm given from our instructors adapted to create just single depth trees
-    def __init__(self, feature):
-        self.feature = feature
-        self.table = []
+class SingleDepthTree:  
+    #This class creates a tree with just 2 leafs
+    #based on the feature with the biggest information gain 
+    #and makes a guess if it belongs to positive or negative
+    def __init__(self):
+        #The table contains the most possible class
+        #an example belongs based the value of one of 
+        # their features
+        self.category_0 = -1
+        self.category_1 = -1
+        self.feature = -1
+        
     
-    def fit(self, x, y):
-        category_0, category_1 = self.TableCreation(x, y)
-        self.table.append(category_0)
-        self.table.append(category_1)
+    def fit(self, weights, x_train, y_train, keys):
+        self.feature = self.bestKey(x_train, y_train, weights, keys)
+        count_1_positive = 0
+        count_0_positive = 0
+        count_1_negative = 0
+        count_0_negative = 0
 
-    def TableCreation(self, x_train, y_train): #Works a tree with depth = 1, the category is saved inside the table 
-        results_0 = []
-        results_1 = []
-        category_1 = -1
-        category_0 = -1
-        for i in range(len(x_train)):
-            if(x_train[i][self.feature] == 1):
-                results_1.append(y_train[i])
+        #the calculation of all the counters
+        for j in range(len(x_train)):
+            if(y_train[j] == 1):
+                if(x_train[j][self.feature] == 1):
+                    count_1_positive += weights[j]
+                else:
+                    count_1_negative += weights[j]
             else:
-                results_0.append(y_train[i])
-        if (results_1.count(0) > results_1.count(1)):
-            category_1 = 0
-        else:
-            category_1 = 1
-        if (results_0.count(0) > results_0.count(1)):
-            category_0 = 0
-        else:
-            category_0 = 1
-        return category_0, category_1
-
-    def predict(self, row):
-        if (row[self.feature] == 0):
-            return self.table[0]
-        else:
-            return self.table[1]
+                if(x_train[j][self.feature] == 1):
+                    count_0_positive += weights[j]
+                else:
+                    count_0_negative += weights[j]
         
-    
-    
-    
-class AdaBoost:
-    def __init__(self, Dataset_x, expectedResults, M): # M = number of hypotheses
-        self.Dataset = Dataset_x
-        self.expectedResults = expectedResults
-        self.m = M
-        self.z = []
-        self.Hypotheses = []
-        self.weights = [1 / len(expectedResults) for i in range(len(expectedResults))]
+        #prob (C = 1 | X = 0)
+        pC1X0 = 0
+        if (count_1_positive + count_1_negative != 0):
+            pC1X0 = float(count_1_positive / (count_1_positive + count_1_negative))
+        #prob (C = 1 | X = 1)
+        pC1X1 = 0
+        if (count_1_positive + count_1_negative != 0):
+            pC1X1 = float(count_0_positive / (count_0_positive + count_0_negative))
+        maxPc = max(pC1X0, 1 - pC1X0)
+        if (maxPc > max(pC1X1, 1 - pC1X1)):
+            if (pC1X0 > 1 - pC1X0):
+                self.category_0 = 1
+            else:
+                self.category_0 = 0
+            self.category_1 = abs(self.category_0 - 1)
+        else:
+            if(pC1X1 > 1 - pC1X1):
+                self.category_1 = 1
+            else:
+                self.category_1 = 0
+            self.category_0 = abs(self.category_1 - 1)
 
-    def fit(self):
-        features = []
-        for i in range(self.m):
-            features.append(random.randint(0, 1570))
-        self.MakeHypotheses(features)
-    
-    def MakeHypotheses(self, features):
-        for i in range(self.m):   #We use this for loop to create our Hypotheses
-            igs = []            #Here we calculate the igs of all the features 
-            for feat_index in features:
-                igs.append(self.InformationGain([example[feat_index] for example in self.Dataset]))
-            maxIG = igs.index(max(igs))
-            SDT = SingleDepthTree(features[maxIG])
-            self.Hypotheses.append(SDT)
-            self.Hypotheses[-1].fit(self.Dataset, self.expectedResults)
-            algorithm_results = []
-            for row in self.Dataset:
-                algorithm_results.append(self.Hypotheses[-1].predict(row))
-            error = 0
-            for j in range(len(self.expectedResults)):
-                if (algorithm_results[j] != self.expectedResults[j]): #if the hypothesis differs from the expected result, increase the error
-                    error += self.weights[j]
-            print("error " + str(error))
-            if (error >= 0.5):
-                self.m -= 1
-                break
-            for j in range(len(self.expectedResults)): #change weights based on the errors
-                if(error != 1):
-                    self.weights[j] *= error / (1-error)
-            self.normalizeWeights()
-            for i in range(self.m):
-                if (error != 0 and error != 1):
-                    self.z.append(0.5 * math.log2((1 - error)/ error))
-                elif error == 0:
-                    self.z.append(1)
-            print(len(self.Dataset))
-            self.DatasetReconstruction() #Reconstructs the dataset based on the weight of each example given
-            print(len(self.Dataset))
-    
-    def normalizeWeights(self): #function to normalize weights to sum up to 1
-        sum_1 = sum(self.weights)
-        self.weights = [x / sum_1 for x in self.weights]
-    
-    def DatasetReconstruction(self): #differentiation of the training examples based on their weights     
-        sums = []
-        sum_1 = 0
-        for i in self.weights:
-            sum_1 += i
-            sums.append(sum_1)
-        print("sum[-1] "+ str(sums[-1]))
-        NDataset = []
-        NWeights = []
-        NExpected_Results = []
-        for i in range(len(self.weights)):
-            rNum = random.uniform(0, sums[-1])
-            ind = 0
-            for j in sums:
-                if (j >= rNum):
-                    NDataset.append(self.Dataset[ind])
-                    NWeights.append(self.weights[ind])
-                    NExpected_Results.append(self.expectedResults[ind])
-                    break
-                ind += 1
-        self.weights = NWeights
-        self.Dataset = NDataset
-        self.expectedResults = NExpected_Results
+    def giniIndex(self, x_train, y_train, weights, keys):
 
-    def InformationGain(self, feature): #given a feature calculate the information gain
-        classes = [0, 1]
-        HC = 0
-        
-        for i in classes:
-            PC = self.expectedResults.count(i) / len(self.expectedResults)
-            HC -= PC * math.log(PC, 2)
-        
-        feature_values = [0, 1]
-        HC_feature = 0
+        self, x_train, y_train, weights, keys
+    """ 
+    def bestKey(self, x_train, y_train, weights, keys):
+        gains = []
 
-        for value in feature_values:
-            pf = feature.count(value) / len(feature)
-            indices = [i for i in range(len(feature)) if feature[i] == value]
+        for i in keys:
+            count_1_positive = 0
+            count_0_positive = 0
+            count_1_negative = 0
+            count_0_negative = 0
 
-            classes_of_feat = [self.expectedResults[i] for i in indices]
-            for j in classes:
-                pcf = classes_of_feat.count(j) / len(classes_of_feat)
-                if (pcf != 0):
-                    temp_H = -pf * pcf * math.log(pcf, 2)
-                    HC_feature += temp_H
-
-        ig = HC - HC_feature
-        return ig
+            #calculate the counters values
+            for j in range(len(x_train)):
+                if(y_train[j] == 1):
+                    if(x_train[j][i] == 1):
+                        count_1_positive += weights[j]
+                    else:
+                        count_1_negative += weights[j]
+                else:
+                    if(x_train[j][i] == 1):
+                        count_0_positive += weights[j]
+                    else:
+                        count_0_negative += weights[j]
             
-    
-    def predict(self, TestData):
-        sum_0 = 0
-        sum_1 = 0
-        ind = 0
-        for tree in self.Hypotheses:
-            prediction = tree.predict(TestData)
-            if (prediction == 0):
-                sum_0 += self.z[ind]
-            else:
-                sum_1 += self.z[ind]
-            ind += 1
-        if (sum_0 > sum_1):
+            #prob C = 1
+            pC1 = (count_1_positive + count_0_positive) / sum(weights)
+            #prob (C = 1 | X = 0)
+            pC1X0 = 0
+            if (count_1_positive + count_1_negative != 0):
+                pC1X0 = float(count_1_positive / (count_1_positive + count_1_negative))
+            #prob (C = 1 | X = 1)
+            pC1X1 = 0
+            if (count_1_positive + count_1_negative != 0):
+                pC1X1 = float(count_0_positive / (count_0_positive + count_0_negative))
+            #entropies
+            hcX1 = self.binEntropy(pC1X1)
+            hcX0 = self.binEntropy(pC1X0)
+
+            #Calculate initial binary entropy
+            count_pos = count_0_positive + count_1_positive
+            hc = self.binEntropy(count_pos / len(x_train))
+
+            gains.append(hc - (pC1 * hcX1) - ((1-pC1) * hcX0))
+
+        maxgain = max(gains)
+        return keys[gains.index(maxgain)]
+
+    def binEntropy(self, prob):
+        if (prob == 0 or prob == 1):
             return 0
-        elif (sum_1 > sum_0):
-            return 1
         else:
-            randomNum = round(random.random())
-            if (randomNum == 0):
-                return 0
+            return - (prob * math.log2(prob)) - ((1-prob)*math.log2(1-prob))
+    """
+    def predict_row(self, row):
+        if (row[self.feature] == 0):
+            return self.category_0
+        else:
+            return self.category_1
+
+    def predict(self, X_train):
+        results = []
+        for row in X_train:
+            if (row[self.feature] == 0):
+                results.append(self.category_0)
             else:
-                return 1
+                results.append(self.category_1)
+        return results
+        
+class AdaBoost:
+    def __init__(self, Dataset_x, M):
+        self.Dataset = Dataset_x
+        self.m = M
+
+    def fit(self,  y_train): 
+        self.W = [1 / len(self.Dataset) for _ in range(len(self.Dataset))]  #the initialization of the weights list
+        self.h_t = []       #the initialization of the hypotheses list
+        self.z = []     #the initialization of the hypotheses weights list
+        self.keys = [i for i in range(1570)]
+        i = 0
+        while (i < self.m):
+            ht = SingleDepthTree()
+            ht.fit(self.W, self.Dataset, y_train, self.keys)
+            self.h_t.append(ht)
+            self.keys.remove(ht.feature)
+            print(len(self.keys))
+            algorithm_results = ht.predict(self.Dataset)
+            error = 0
+            for j in range(len(y_train)):
+                if(y_train[j] != algorithm_results[j]):
+                    error += self.W[j]
+            error = error / sum(self.W)
+            if (round(error, 4) >= 0.5105):
+                self.h_t.remove(ht)
+                continue
+            for j in range(len(y_train)): #change weights based on the errors
+                    if (algorithm_results[j] == y_train[j]):
+                        if(error != 1):
+                            self.W[j] *= (error / (1 - error))
+            self.normalizeWeights()
+            if (error != 0 and error != 1):
+                self.z.append(0.5 * log2((1 - error)/ error))
+            elif error == 0:
+                self.z.append(1)
+            i += 1
+
+    def normalizeWeights(self): #function to normalize weights to sum up to 1
+        sum_1 = sum(self.W)
+        self.W = [x / sum_1 for x in self.W]
+
+    def predict(self, TestData):
+        results = []
+        print(len(self.h_t))
+        for row in TestData:
+            sum_0 = 0
+            sum_1 = 0
+            index = 0
+            for h in self.h_t:
+                prediction = h.predict_row(row)
+                if (prediction == 0):       #prediction is the return categorization of the given row from the tree
+                    sum_0 += self.z[index]
+                else:
+                    sum_1 += self.z[index]
+                index += 1
+            if (sum_0 > sum_1):
+                results.append(0)
+            elif (sum_1 > sum_0):
+                results.append(1)
+            else:
+                randomNum = round(random.random())
+                if (randomNum == 0):
+                    results.append(0)
+                else:
+                    results.append(1)
+        return results
+    
+    
