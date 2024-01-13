@@ -34,7 +34,7 @@ for i in range(len(PosTrainData)):
 for i in range(len(NegTrainData)):
     results.append(0)
 
-Ada = AdaBoost(10)
+Ada = AdaBoost(100)
 Ada.fit(Train_Data, results)
 
 PosTestData = []
