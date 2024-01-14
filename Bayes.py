@@ -1,7 +1,4 @@
-import csv
 from operator import add
-import pickle
-import pandas as pd
 from math import log2
 
 
@@ -9,12 +6,13 @@ from math import log2
 class NaiveBayes:
 
   def __init__(self):
-    self.pos_vocabulary_prob = []
-    self.neg_vocabulary_prob = []
     self.prob_pos = 0
     self.prob_neg = 0
 
   def train(self, pos_Data, Pos_Columns, Neg_Data, Neg_Columns):
+    #In the train function of naive Bayes we calculate all
+    #the probabilities of the existence of a feature in the
+    #negative and the positive examples respectively
 
     print("Training has started.")
 
@@ -22,7 +20,7 @@ class NaiveBayes:
 
     nPos = len(pos_Data)
     
-    pos_vocabulary_count = [0 for j in range(Pos_Columns)]          # it creates a table of zeros the length of a row
+    pos_vocabulary_count = [0 for j in range(Pos_Columns)]          # it creates a table of zeros with length of a row
     
     for row in pos_Data:
       pos_vocabulary_count = list(map( add, pos_vocabulary_count, row))   # get the count of each word (feature) in the negative examples
@@ -41,58 +39,45 @@ class NaiveBayes:
     
     self.neg_vocabulary_prob = [x / nNeg for x in neg_vocabulary_count]   # calculate the probability of each feature for the negative examples 
 
-    self.prob_pos = nPos / (nNeg + nPos)
-    self.prob_neg = nNeg / (nNeg + nPos)
+    self.prob_pos = nPos / (nNeg + nPos)    #calculation of the probability an example is positive
+    self.prob_neg = nNeg / (nNeg + nPos)    #calculation of the probability an example is negative
 
   def test(self, pos_Data, neg_Data):
-
+    #We calculate the probability each row(review)
+    #is classified in the negatives or positives 
+    #and we return the number of them respectively
     print("Testing has started.")
-    
 
     print("Testing positive test data...")
 
-    truePositive = 0
-    
-    numberOfPositive = len(pos_Data)
+    bayesPositive = 0
     
     for row in pos_Data:
       probP = self.prob_pos * self.calculateProb(1, row)    # calculate the probability an example is positive depending on its vector
       probN = self.prob_neg * self.calculateProb(0, row)    # calculate the probability an example is negative depending on its vector
 
       if probP >= probN:
-        truePositive += 1
+        bayesPositive += 1
 
-    
 
     print("Testing negative test data...")
 
-    trueNegative = 0
+    bayesNegative = 0
     
-
-    numberOfNegative = len(neg_Data)
     for row in neg_Data:
       probP = self.prob_pos * self.calculateProb(1, row)    # calculate the probability an example is positive depending on its vector
       probN = self.prob_neg * self.calculateProb(0, row)    # calculate the probability an example is negative depending on its vector
         
       if probP <= probN:
-        trueNegative += 1
+        bayesNegative += 1
 
-    falsePositive = numberOfNegative - trueNegative
-    falseNegative = numberOfPositive - truePositive
-
-    # print test statistics
-    print("True Positive: " + str(truePositive))
-    print("False Positive: " + str(falsePositive))
-    print("True Negative: " + str(trueNegative))
-    print("False Negative: " + str(falseNegative))
-    print("The accuracy for the positive data is: " + str(round(((truePositive/numberOfPositive) * 100), 2)))   # 84.58 
-    print("The accuracy for the negative data is: " + str(round(((trueNegative/numberOfNegative) * 100), 2)))  # 78.3
-    print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(numberOfNegative + numberOfPositive)) * 100), 2)))  
-    print("For the positive data the precision is: " + str(round((truePositive/(truePositive+falsePositive) * 100), 2)))   
-    print("For the positive data the recall is: " + str(round((truePositive/(truePositive+falseNegative)) * 100, 2)))   
+    return bayesPositive, bayesNegative
 
 
   def calculateProb(self, category, row):
+    #In this function we do the calculation
+    #of the classification probability for each 
+    #row(review)
     prob = 0
     if category == 1:
       l = self.pos_vocabulary_prob
