@@ -1,5 +1,4 @@
 import copy
-import pickle
 import pandas as pd
 from Bayes import *
 from AdaBoost import *
@@ -55,9 +54,9 @@ for k in list1:
     print("Reading the positive training data!")
 
     dfPos = pd.read_csv("positiveTrain.csv", header = None)     # read the positive training examples
-    sizePos = dfPos.shape[0]        # shape[0] contains the number of rows of our file
+    sizePosTrain = k       # shape[0] contains the number of rows of our file
 
-    for i in range(sizePos):
+    for i in range(sizePosTrain):
         row = [int(x) for x in dfPos.iloc[i, : ]]  # df.iloc function returns the row of our csv that we tell it to give. 
         posTrainData.append(row)
 
@@ -65,18 +64,18 @@ for k in list1:
     print("Reading the negative training data!")
 
     dfNeg = pd.read_csv("negativeTrain.csv", header = None)     # read the negative training examples
-    sizeNeg = dfNeg.shape[0]        # shape[0] contains the number of rows of our file
+    sizeNegTrain = k        # shape[0] contains the number of rows of our file
 
-    for i in range(sizeNeg):
+    for i in range(sizeNegTrain):
         row = [int(x) for x in dfNeg.iloc[i, : ]]
         negTrainData.append(row)
 
-    trainData = copy.deepcopy(posTrainData[:k])
-    resultsTrain = [1]*k
+    trainData = copy.deepcopy(posTrainData)
+    resultsTrain = [1] * k
 
-    trainData += negTrainData[:k]
+    trainData += negTrainData
 
-    resultsTrain += [0]*k
+    resultsTrain += [0] * k
     
     ###############################################################################################
     
@@ -88,7 +87,7 @@ for k in list1:
     y_pred = myBayes.predict(testData)
 
     ###### Test Data Test ######
-    print("\nNaive Bayes for "+str(k+k)+ " training examples.\n")
+    print("\nNaive Bayes for "+str(k + k)+ " training examples.\n")
     print("Statistics on Test Data:  \n")
 
     truePositive = 0
@@ -110,13 +109,13 @@ for k in list1:
     print("True Negative: " + str(trueNegative))
     print("False Negative: " + str(falseNegative))
     print("The accuracy for the positive data is: " + str(round(((truePositive/sizePosTest)), 3)))
-    print("The accuracy for the negative data is: " + str(round(((trueNegative/sizeNegTest)), 3)))
-    print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(sizeNegTest + sizePosTest))), 3)))  
-    precision = round((truePositive/(truePositive+falsePositive)), 3)
+    print("The accuracy for the negative data is: " + str(round(((trueNegative / sizeNegTest)), 3)))
+    print("The total accuracy is: " + str(round((((trueNegative + truePositive) / (sizeNegTest + sizePosTest))), 3)))  
+    precision = round((truePositive / (truePositive + falsePositive)), 3)
     print("For the positive data the precision is: " + str(precision))  
-    recall =  round((truePositive/(truePositive+falseNegative)), 3)
+    recall =  round((truePositive / (truePositive + falseNegative)), 3)
     print("For the positive data the recall is: " + str(recall))    
-    print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/precision), 3)))  
+    print("The F1 for the negative test data is: " + str(round(2 / (1 / recall + 1 / precision), 3)))  
 
 
 
@@ -127,16 +126,16 @@ for k in list1:
 
     truePositive = 0
     trueNegative = 0
-    for i in range(k):
+    for i in range(sizePosTrain):
         if y_pred[i] == 1:
             truePositive += 1
 
-    for i in range(k, k + k):
+    for i in range(sizePosTrain, sizePosTrain + sizeNegTrain):
         if y_pred[i] == 0:
             trueNegative += 1
 
-    falsePositive = k - trueNegative
-    falseNegative = k - truePositive
+    falsePositive = sizeNegTrain - trueNegative
+    falseNegative = sizePosTrain - truePositive
 
     # print train statistics
     print("True Positive: " + str(truePositive))
@@ -145,17 +144,17 @@ for k in list1:
     print("False Negative: " + str(falseNegative))
     print("The accuracy for the positive data is: " + str(round(((truePositive/k)), 3)))
     print("The accuracy for the negative data is: " + str(round(((trueNegative/k)), 3)))
-    print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(k + k))), 3)))  
-    precision = round((truePositive/(truePositive+falsePositive)), 3)
+    print("The total accuracy is: " + str(round((((trueNegative + truePositive) / (k + k))), 3)))  
+    precision = round((truePositive / (truePositive + falsePositive)), 3)
     print("For the positive data the precision is: " + str(precision))  
-    recall =  round((truePositive/(truePositive+falseNegative)), 3)
+    recall =  round((truePositive / (truePositive + falseNegative)), 3)
     print("For the positive data the recall is: " + str(recall))    
-    print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/precision), 3)))  
+    print("The F1 for the negative test data is: " + str(round(2 / (1 / recall + 1 / precision), 3)))  
 
 
 
     ###########################################################################################################
-    """
+
     ############ Random Forest #######################################################
 
     X, y = trainData, resultsTrain
@@ -165,7 +164,7 @@ for k in list1:
 
     ###### Test Data Test ######
 
-    print("\nRandom Forest for "+str(k+k)+ " training examples.\n")
+    print("\nRandom Forest for "+str(k + k)+ " training examples.\n")
     print("Statistics on Test Data:  \n")
 
     truePositive = 0
@@ -174,7 +173,7 @@ for k in list1:
         if y_pred[i] == 1:
             truePositive += 1
 
-    for i in range(sizePosTest, sizeNegTest+sizePosTest):
+    for i in range(sizePosTest, sizeNegTest + sizePosTest):
         if y_pred[i] == 0:
             trueNegative += 1
 
@@ -187,14 +186,14 @@ for k in list1:
     print("False Positive: " + str(falsePositive))
     print("True Negative: " + str(trueNegative))
     print("False Negative: " + str(falseNegative))
-    print("The accuracy for the positive data is: " + str(round(((truePositive/sizePosTest)), 3)))
-    print("The accuracy for the negative data is: " + str(round(((trueNegative/sizeNegTest)), 3)))
-    print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(sizeNegTest + sizePosTest))), 3)))  
-    precision = round((truePositive/(truePositive+falsePositive)), 3)
+    print("The accuracy for the positive data is: " + str(round(((truePositive / sizePosTest)), 3)))
+    print("The accuracy for the negative data is: " + str(round(((trueNegative / sizeNegTest)), 3)))
+    print("The total accuracy is: " + str(round((((trueNegative + truePositive) / (sizeNegTest + sizePosTest))), 3)))  
+    precision = round((truePositive / (truePositive+falsePositive)), 3)
     print("For the positive data the precision is: " + str(precision))  
-    recall =  round((truePositive/(truePositive+falseNegative)), 3)
+    recall =  round((truePositive / (truePositive + falseNegative)), 3)
     print("For the positive data the recall is: " + str(recall))    
-    print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/precision), 3)))  
+    print("The F1 for the negative test data is: " + str(round(2 / (1 / recall + 1 / precision), 3)))  
 
 
 
@@ -203,35 +202,33 @@ for k in list1:
 
     y_pred = myRandomForest.predict(trainData)
 
-
     truePositive = 0
     trueNegative = 0
-    for i in range(k):
+    for i in range(sizePosTrain):
         if y_pred[i] == 1:
             truePositive += 1
 
-    for i in range(k, k + k):
+    for i in range(sizePosTrain, sizePosTrain + sizeNegTrain):
         if y_pred[i] == 0:
             trueNegative += 1
 
 
-
-    falsePositive = k - trueNegative
-    falseNegative = k - truePositive
+    falsePositive = sizeNegTrain - trueNegative
+    falseNegative = sizePosTrain - truePositive
 
     # print train statistics
     print("True Positive: " + str(truePositive))
     print("False Positive: " + str(falsePositive))
     print("True Negative: " + str(trueNegative))
     print("False Negative: " + str(falseNegative))
-    print("The accuracy for the positive data is: " + str(round(((truePositive/k)), 3)))
-    print("The accuracy for the negative data is: " + str(round(((trueNegative/k)), 3)))
-    print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(k + k))), 3)))  
-    precision = round((truePositive/(truePositive+falsePositive)), 3)
+    print("The accuracy for the positive data is: " + str(round(((truePositive / sizePosTrain)), 3)))
+    print("The accuracy for the negative data is: " + str(round(((trueNegative / sizeNegTrain)), 3)))
+    print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(sizePosTrain + sizeNegTrain))), 3)))  
+    precision = round((truePositive / (truePositive + falsePositive)), 3)
     print("For the positive data the precision is: " + str(precision))  
-    recall =  round((truePositive/(truePositive+falseNegative)), 3)
+    recall =  round((truePositive / (truePositive + falseNegative)), 3)
     print("For the positive data the recall is: " + str(recall))    
-    print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/precision), 3)))  
+    print("The F1 for the negative test data is: " + str(round(2 / (1 / recall + 1 / precision), 3)))  
     
     """
 
@@ -241,15 +238,11 @@ for k in list1:
     myAdaBoost = AdaBoost(100)
     myAdaBoost.fit(trainData, resultsTrain)
 
-    with open('Ada_'+str(k)+'.pickle', 'wb') as handle:
-        pickle.dump(myAdaBoost, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-
     y_pred = myAdaBoost.predict(testData)
 
     ###### Test Data Test ######
         
-    print("\nAdaBoost for "+str(k+k)+ " training examples.\n")
+    print("\nAdaBoost for "+str(sizePosTrain + sizeNegTrain)+ " training examples.\n")
     print("Statistics on Test Data:  \n")
 
 
@@ -271,14 +264,14 @@ for k in list1:
     print("False Positive: " + str(falsePositive))
     print("True Negative: " + str(trueNegative))
     print("False Negative: " + str(falseNegative))
-    print("The accuracy for the positive data is: " + str(round(((truePositive/sizePosTest)), 3)))
-    print("The accuracy for the negative data is: " + str(round(((trueNegative/sizeNegTest)), 3)))
-    print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(sizeNegTest + sizePosTest))), 3)))  
-    precision = round((truePositive/(truePositive+falsePositive)), 3)
+    print("The accuracy for the positive data is: " + str(round(((truePositive / sizePosTest)), 3)))
+    print("The accuracy for the negative data is: " + str(round(((trueNegative / sizeNegTest)), 3)))
+    print("The total accuracy is: " + str(round((((trueNegative + truePositive) / (sizeNegTest + sizePosTest))), 3)))  
+    precision = round((truePositive / (truePositive + falsePositive)), 3)
     print("For the positive data the precision is: " + str(precision))  
-    recall =  round((truePositive/(truePositive+falseNegative)), 3)
+    recall =  round((truePositive / (truePositive + falseNegative)), 3)
     print("For the positive data the recall is: " + str(recall))    
-    print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/precision), 3)))
+    print("The F1 for the negative test data is: " + str(round(2 / (1 / recall + 1 / precision), 3)))
 
 
 
@@ -289,28 +282,27 @@ for k in list1:
 
     truePositive = 0
     trueNegative = 0
-    for i in range(k):
+    for i in range(sizePosTrain):
         if y_pred[i] == 1:
             truePositive += 1
 
-    for i in range(k, k + k):
+    for i in range(sizePosTrain, sizePosTrain + sizeNegTrain):
         if y_pred[i] == 0:
             trueNegative += 1
 
-    falsePositive = k - trueNegative
-    falseNegative = k - truePositive
+    falsePositive = sizeNegTrain - trueNegative
+    falseNegative = sizePosTrain - truePositive
 
     # print train statistics
     print("True Positive: " + str(truePositive))
     print("False Positive: " + str(falsePositive))
     print("True Negative: " + str(trueNegative))
     print("False Negative: " + str(falseNegative))
-    print("The accuracy for the positive data is: " + str(round(((truePositive/k)), 3)))
-    print("The accuracy for the negative data is: " + str(round(((trueNegative/k)), 3)))
-    print("The total accuracy is: " + str(round((((trueNegative + truePositive)/(k + k))), 3)))  
-    precision = round((truePositive/(truePositive+falsePositive)), 3)
+    print("The accuracy for the positive data is: " + str(round(((truePositive / sizePosTrain)), 3)))
+    print("The accuracy for the negative data is: " + str(round(((trueNegative / sizeNegTrain)), 3)))
+    print("The total accuracy is: " + str(round((((trueNegative + truePositive) / (sizeNegTrain + sizePosTrain))), 3)))  
+    precision = round((truePositive / (truePositive + falsePositive)), 3)
     print("For the positive data the precision is: " + str(precision))  
-    recall =  round((truePositive/(truePositive+falseNegative)), 3)
+    recall =  round((truePositive / (truePositive + falseNegative)), 3)
     print("For the positive data the recall is: " + str(recall))    
-    print("The F1 for the negative test data is: " + str(round(2/(1/recall + 1/precision), 3)))  
-    """
+    print("The F1 for the negative test data is: " + str(round(2 / (1 / recall + 1 / precision), 3)))  
