@@ -1,7 +1,4 @@
 import random
-from time import sleep
-import pandas as pd
-import numpy as np        
 from math import exp, log2
 
 class SingleDepthTree:  
@@ -18,6 +15,8 @@ class SingleDepthTree:
         
     
     def fit(self, weights, x_train, y_train, keys):
+        #We use the feature with the less gini index to create the tree
+        #and we calculate the p(C = 1 | X = 0) and the p(C = 1 | X = 1) 
         self.feature = self.giniIndex(x_train, y_train, weights, keys)
         count_1_positive = 0
         count_0_positive = 0
@@ -54,10 +53,10 @@ class SingleDepthTree:
             self.category_0 = 0
         
 
-
     def giniIndex(self, x_train, y_train, weights, keys):
+        #Gini index uses the squares sum of the p(C = 1 | X = 0) 
+        #and the p(C = 1 | X = 1) and their inverse 
         GiniIndex = []
-
 
         for i in keys:
             count_1_positive = 0
@@ -97,14 +96,18 @@ class SingleDepthTree:
             
     
     def predict_row(self, row):
+        #uses the value of the selected feature
+        #of the row to predict its classification 
         if (row[self.feature] == 0):
             return self.category_0
         else:
             return self.category_1
 
-    def predict(self, X_train):
+    def predict(self, testData):
+        #uses the value of the selected feature
+        #of the testData to predict their classification
         results = []
-        for row in X_train:
+        for row in testData:
             if (row[self.feature] == 0):
                 results.append(self.category_0)
             else:
@@ -113,6 +116,8 @@ class SingleDepthTree:
         
 class AdaBoost:
     def __init__(self, M):
+        #sets the m feature which
+        #defines the number of trees created
         self.m = M
 
     def fit(self, x_train, y_train):
@@ -126,7 +131,6 @@ class AdaBoost:
             ht = SingleDepthTree()
             ht.fit(self.W, self.Dataset, y_train, self.keys)
             self.h_t.append(ht)
-            self.keys.remove(ht.feature)
             algorithm_results = ht.predict(self.Dataset)
             error = 0
             for j in range(len(y_train)):
@@ -134,6 +138,7 @@ class AdaBoost:
                     error += self.W[j]
             if (error >= 0.5):
                 self.h_t.remove(ht)
+                self.keys.remove(ht.feature)
                 continue
             z = 0
             if (error != 0):
@@ -143,15 +148,11 @@ class AdaBoost:
             elif error >= 0.5:
                 z = 0
             self.z.append(z)
-            count_m = 0
-            count_n = 0
-            for j in range(len(y_train)): #change weights based on the errors
+            for j in range(len(y_train)): #change weights based on the errors and their exp value
                 if (algorithm_results[j] == y_train[j]):
                     self.W[j] = self.W[j] * exp(-z)
-                    count_m += 1
                 else:
                     if (error != 0):
-                        count_n += 1
                         self.W[j] = self.W[j] * exp(z)
             self.normalizeWeights()
             i += 1
