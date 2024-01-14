@@ -120,12 +120,18 @@ class AdaBoost:
         #defines the number of trees created
         self.m = M
 
+
+        #initialize all the tables we gonna need
+        #and create all the trees with the best feature each time,
+        #calculate their error, update their weights and set each
+        #hypothesis weight for the prediction
     def fit(self, x_train, y_train):
         self.Dataset = x_train 
         self.W = [1 / len(self.Dataset) for _ in range(len(self.Dataset))]  #the initialization of the weights list
         self.h_t = []       #the initialization of the hypotheses list
         self.z = []     #the initialization of the hypotheses weights list
         self.keys = [i for i in range(1570)]
+        
         i = 0
         while (i < self.m):
             ht = SingleDepthTree()
@@ -133,15 +139,15 @@ class AdaBoost:
             self.h_t.append(ht)
             algorithm_results = ht.predict(self.Dataset)
             error = 0
-            for j in range(len(y_train)):
+            for j in range(len(y_train)):   #calculate the error using each examples weight
                 if(y_train[j] != algorithm_results[j]):
                     error += self.W[j]
-            if (error >= 0.5):
+            if (error >= 0.5):  #if error is greater than 0.5, remove the feature from our list
                 self.h_t.remove(ht)
                 self.keys.remove(ht.feature)
                 continue
             z = 0
-            if (error != 0):
+            if (error != 0):    #set the weight of the voting of each hypothesis
                 z = 0.5 * log2((1 - error)/ error)
             elif error == 0:
                 z = 1
@@ -172,8 +178,8 @@ class AdaBoost:
             index = 0
             for h in self.h_t:
                 prediction = h.predict_row(row)
-                if (prediction == 0):       #prediction is the return categorization of the given row from the tree
-                    sum_0 += self.z[index]
+                if (prediction == 0):       #prediction is the return classification of the given row from the tree
+                    sum_0 += self.z[index]  #we add the hypothesis weight in these sums
                 else:
                     sum_1 += self.z[index]
                 index += 1
