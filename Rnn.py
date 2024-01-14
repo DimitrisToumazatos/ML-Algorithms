@@ -1,12 +1,9 @@
 import os
-import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import tensorflow as tf
 from tqdm import tqdm
 from tensorflow import keras
 from keras import utils
-from IPython.display import Image
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 

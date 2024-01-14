@@ -2,7 +2,6 @@ from operator import add
 from math import log2
 
 
-
 class NaiveBayes:
 
   def __init__(self):
@@ -95,4 +94,3 @@ class NaiveBayes:
       index += 1
 
     return prob
-
