@@ -43,7 +43,7 @@ for i in range(len(negTrainData)):
     results.append(0)
 
 #Random forest initialization and Training
-rf = RandomForest(101, 4)
+rf = RandomForest(101, 2)
 rf.train(Train_Data, results, colNeg)
 
 #AdaBoost initialization and training
