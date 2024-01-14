@@ -1,5 +1,4 @@
 from id3 import *
-import pandas as pd
 from random import randint
 import numpy as np
 from operator import add
@@ -64,9 +63,3 @@ class RandomForest:
         print("Test finished")
 
         return rfPositive, rfNegative
-        
-
-
-
-
-
