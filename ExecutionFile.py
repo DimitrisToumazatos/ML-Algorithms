@@ -28,27 +28,28 @@ for i in range(sizeNegTrain):
     row = [int(x) for x in dfNeg.iloc[i, : ]]       # df.iloc function returns the row of our csv that i shows
     negTrainData.append(row)
 
-#Bayes initialization and Training
-nB = NaiveBayes()
-nB.train(posTrainData, colPos, negTrainData, colNeg)
 
 #Train Data modifications
-Train_Data = copy.deepcopy(posTrainData)    #creates a deepcopy of the posTrainData
+trainData = copy.deepcopy(posTrainData)    #creates a deepcopy of the posTrainData
 for row in negTrainData:
-    Train_Data.append(row)
+    trainData.append(row)
 results = []
 for i in range(len(posTrainData)):
     results.append(1)
 for i in range(len(negTrainData)):
     results.append(0)
 
+#Bayes initialization and Training
+nB = NaiveBayes()
+nB.train(trainData, results)
+
 #Random forest initialization and Training
 rf = RandomForest(101, 4)
-rf.train(Train_Data, results, colNeg)
+rf.train(trainData, results, colNeg)
 
 #AdaBoost initialization and training
 Ada = AdaBoost(100)
-Ada.fit(Train_Data, results)
+Ada.fit(trainData, results)
 
 
 
@@ -87,13 +88,23 @@ for i in range(sizePosTest):
 for i in range(sizeNegTest):
     results.append(0)
 
+results = Ada.predict(testData)
+correct = 0
+for i in range(sizePosTest):
+    if results[i] == 1 : correct += 1
+print(correct / sizePosTest)
+correct = 0
+for i in range(sizePosTest, sizePosTest + sizePosTest):
+    if results[i] == 0 : correct += 1
+print(correct / sizeNegTest)
+
 #Naive Bayes Test
 nBpositive, nBnegative = nB.test(posTestData, negTestData)
 falsePositive = sizeNegTest - nBnegative
 falseNegative = sizePosTest - nBpositive
 
 # print test statistics
-print("Naive bayes statistics for " + str(sizeNegTrain + sizePosTrain) + " train examples are the above:")
+print("Naive bayes statistics for " + str(sizeNegTrain + sizePosTrain) + " train examples are the following:")
 print("True Positive: " + str(nBpositive))
 print("False Positive: " + str(falsePositive))
 print("True Negative: " + str(nBnegative))
@@ -113,7 +124,7 @@ falsePositive = sizeNegTest -rfnegative
 falseNegative = sizePosTest - rfpositive
 
 # print train statistics
-print("Random Forest statistics for " + str(sizeNegTrain + sizePosTrain) + " train examples are the above:")
+print("Random Forest statistics for " + str(sizeNegTrain + sizePosTrain) + " train examples are the following:")
 print("True Positive: " + str(rfpositive))
 print("False Positive: " + str(falsePositive))
 print("True Negative: " + str(rfnegative))
