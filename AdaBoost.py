@@ -1,7 +1,4 @@
 import random
-from time import sleep
-import pandas as pd
-import numpy as np        
 from math import exp, log2
 
 class SingleDepthTree:  
@@ -57,7 +54,6 @@ class SingleDepthTree:
 
     def giniIndex(self, x_train, y_train, weights, keys):
         GiniIndex = []
-
 
         for i in keys:
             count_1_positive = 0
@@ -126,7 +122,6 @@ class AdaBoost:
             ht = SingleDepthTree()
             ht.fit(self.W, self.Dataset, y_train, self.keys)
             self.h_t.append(ht)
-            self.keys.remove(ht.feature)
             algorithm_results = ht.predict(self.Dataset)
             error = 0
             for j in range(len(y_train)):
@@ -134,6 +129,7 @@ class AdaBoost:
                     error += self.W[j]
             if (error >= 0.5):
                 self.h_t.remove(ht)
+                self.keys.remove(ht.feature)
                 continue
             z = 0
             if (error != 0):
@@ -143,15 +139,11 @@ class AdaBoost:
             elif error >= 0.5:
                 z = 0
             self.z.append(z)
-            count_m = 0
-            count_n = 0
             for j in range(len(y_train)): #change weights based on the errors
                 if (algorithm_results[j] == y_train[j]):
                     self.W[j] = self.W[j] * exp(-z)
-                    count_m += 1
                 else:
                     if (error != 0):
-                        count_n += 1
                         self.W[j] = self.W[j] * exp(z)
             self.normalizeWeights()
             i += 1
