@@ -12,7 +12,7 @@ class NaiveBayes:
   # In this function we calculate all
   # the probabilities of the existence of a feature in the
   # negative and the positive examples.
-  def train(self, trainData, trainResults):
+  def fit(self, trainData, trainResults):
 
     print("Training has started.")
 
@@ -53,7 +53,7 @@ class NaiveBayes:
   # probability each given test example being
   # classified as negative or positive 
   # and we return the predictions.
-  def test(self, testData):
+  def predict(self, testData):
     print("Testing has started.")
 
     prediction = []
