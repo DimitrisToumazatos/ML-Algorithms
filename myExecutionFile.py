@@ -230,9 +230,9 @@ for k in list1:
     print("For the positive data the recall is: " + str(recall))    
     print("The F1 for the negative test data is: " + str(round(2 / (1 / recall + 1 / precision), 3)))  
     
-    """
+    
 
-    """
+    
     ###################### AdaBoost ##########################################
 
     myAdaBoost = AdaBoost(100)
