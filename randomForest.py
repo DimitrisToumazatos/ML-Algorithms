@@ -2,6 +2,8 @@ from id3 import *
 from random import randint
 import numpy as np
 from operator import add
+import pandas as pd
+import copy
 
 class RandomForest:
 
@@ -49,8 +51,8 @@ class RandomForest:
             treeOut = list(map(add, treeOut, temp))     # adds the results of the trees.
 
         prediction = []
-        for i in treeOut:                               # Make predictions for each example.
-            if sum(i) > self.nTrees/2:                  # The example is deemed as positive.
+        for i in treeOut:                  # Make predictions for each example.
+            if np.sum(i) > self.nTrees / 2:                  # The example is deemed as positive.
                 prediction.append(1)
             else:                                       # The example is deemed as negative.
                 prediction.append(0)

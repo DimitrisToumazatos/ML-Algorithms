@@ -148,7 +148,6 @@ class AdaBoost:
         
         i = 0
         while (i < self.m):
-            print(i)
             ht = SingleDepthTree()
             ht.fit(self.w, x_train, y_train, self.keys)
             self.h_t.append(ht)
@@ -156,7 +155,7 @@ class AdaBoost:
             error = 0
             for j in range(len(y_train)):   #calculate the error using each examples weight
                 if(y_train[j] != algorithm_results[j]):
-                    error += self.W[j]
+                    error += self.w[j]
             if (error >= 0.5):  #if error is greater than 0.5, remove the feature from our list
                 self.h_t.remove(ht)
                 self.keys.remove(ht.feature)

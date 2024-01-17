@@ -78,7 +78,7 @@ for k in list1:
     resultsTrain += [0] * k
     
     ###############################################################################################
-    
+
     ########################## Bayes ##################################################3
     
 
@@ -159,12 +159,12 @@ for k in list1:
 
     X, y = trainData, resultsTrain
     myRandomForest = RandomForest(100, 4)
-    myRandomForest.fit(X, y)
-    y_pred = myRandomForest.predict(testData)
+    myRandomForest.train(X, y)
+    y_pred = myRandomForest.test(testData)
 
     ###### Test Data Test ######
 
-    print("\nRandom Forest for "+str(k + k)+ " training examples.\n")
+    print("\nRandom Forest for " + str(k + k) + " training examples.\n")
     print("Statistics on Test Data:  \n")
 
     truePositive = 0
@@ -200,7 +200,7 @@ for k in list1:
     ##### Train Data Test #######
     print("\nStatistics on Train Data:  \n")
 
-    y_pred = myRandomForest.predict(trainData)
+    y_pred = myRandomForest.test(trainData)
 
     truePositive = 0
     trueNegative = 0
