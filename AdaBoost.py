@@ -149,7 +149,6 @@ class AdaBoost:
         
         i = 0
         while (i < self.m):
-            print(i)
             ht = SingleDepthTree()
             ht.fit(self.w, x_train, y_train, self.keys)
             self.h_t.append(ht)
