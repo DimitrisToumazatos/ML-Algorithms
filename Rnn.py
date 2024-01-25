@@ -10,43 +10,6 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 list1 = [2000, 4000, 6000, 8000, 10000] # Number of examples from 1 category
 
-######### Read Test Data ############
-            
-posTestData = []
-negTestData = []
-
-#Reading of the Positive Test Data
-print("Reading the positive test data!")
-
-dfPos = pd.read_csv("positiveTest.csv", header = None)     # read the positive test examples
-k = dfPos.shape[0]                                  # shape[0] contains the number of rows of our file
-
-for i in range(k):
-    row = [int(x) for x in dfPos.iloc[i, : ]]  # df.iloc function returns the row of our csv that we tell it to give. 
-    posTestData.append(row)
-
-#Reading of the Negative Test Data
-print("Reading the negative test data!")
-
-dfNeg = pd.read_csv("negativeTest.csv", header = None)     # read the negative test examples
-k = dfNeg.shape[0]                                  # shape[0] contains the number of rows of our file
-
-for i in range(k):
-    row = [int(x) for x in dfNeg.iloc[i, : ]]
-    negTestData.append(row)
-
-
-testData = copy.deepcopy(posTestData)
-for row in negTestData:
-    testData.append(row)
-
-y_test = []
-
-for i in range(k):
-    y_test.append(1)
-for i in range(k):
-    y_test.append(0)
-
 for k in list1:
     
     ###############################################################################################
