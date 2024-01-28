@@ -88,7 +88,10 @@ for k in list1:
         loss1, accuracy = imdb_rnn.evaluate(x_test_imdb[:k], np.array(y_test_imdb[:k]))
         truePositive = round(accuracy * k)
         loss2, accuracy = imdb_rnn.evaluate(x_test_imdb[k:], np.array(y_test_imdb[k:]))
-        
+        trueNegative = round(accuracy * k)
+
+        # print train statistics
+        print("Loss: " + str((loss1 + loss2) / 2))   
 
         # print train statistics
         print("Loss: " + str((loss1 + loss2) / 2))
