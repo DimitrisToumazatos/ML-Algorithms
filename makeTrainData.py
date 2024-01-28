@@ -16,8 +16,8 @@ for i in posNegList:                    # read training data and calculate count
     DIR = s1+i+s2
     list1 = os.listdir(DIR)
     for filename in list1:
-        words = re.findall(r'\w+', open(s1+i+s2 + filename, encoding="utf8").read().lower())
-        for word in words:
+        words = re.findall(r'\w+', open(s1+i+s2 + filename, encoding="utf8").read().lower()) #using the re python library we get all the words from each review
+        for word in words:  #with this for we update the dictionary that we keep all the words and their count
             if len(word)>2:
                 if word in dict1:
                     dict1[word] += 1
@@ -26,13 +26,8 @@ for i in posNegList:                    # read training data and calculate count
 
 most_common = dict(sorted(dict1.items(), key=itemgetter(1), reverse=True)[:m]) # create and sort dictionary of most common words and their count 
 
-print(len(most_common))
-
 
 l = list(most_common.keys())[n:]
-
-print(len(l))
-
 
 
 with open('most_common_words.csv', 'w', newline='', encoding="utf8") as csv_file:        # write the most common words in a file
@@ -49,7 +44,7 @@ for i in posNegList:            # create verctors for the traing data (positie/n
     for filename in list1:
         words = re.findall(r'\w+', open(s1+i+s2 + filename, encoding="utf8").read().lower())
         vec = []
-        for j in l:
+        for j in l: #with this for loop we update the vecs list and consequently the train list with which we create our csv files
             if j in words:
                 vec.append(1)
             else:
@@ -64,5 +59,3 @@ for i in posNegList:            # create verctors for the traing data (positie/n
     with open(temp, 'w', newline='') as csv_file:  
         writer = csv.writer(csv_file)
         writer.writerows(train)
-
-
