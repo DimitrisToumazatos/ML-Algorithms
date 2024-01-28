@@ -140,9 +140,7 @@ class AdaBoost:
         #calculate their error, update their weights and set each
         #hypothesis weight for the prediction
     def fit(self, x_train, y_train):
-        datasetLength = len(x_train)
-        startingWeights = 1 / datasetLength
-        self.w = [startingWeights] * datasetLength  #the initialization of the weights list
+        self.w = [1 / len(x_train) for _ in range(len(x_train))]  #the initialization of the weights list
         self.h_t = []       #the initialization of the hypotheses list
         self.z = []     #the initialization of the hypotheses weights list
         self.keys = [i for i in range(1570)]
