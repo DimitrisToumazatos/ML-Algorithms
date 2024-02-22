@@ -36,8 +36,7 @@ with open('most_common_words.csv', 'w', newline='', encoding="utf8") as csv_file
         writer.writerow([i])
 
 
-for i in posNegList:            # create verctors for the traing data (positie/negative) 
-    print(1)
+for i in posNegList:            # create verctors for the traing data (positie/negative)
     DIR = s1+i+s2
     train = []
     list1 = os.listdir(DIR)     #a function which creates a list which contains the file names in the DIR folder 
