@@ -13,9 +13,12 @@ for k in list1:
     ###############################################################################################
     (x_train_imdb, y_train_imdb), (x_test_imdb, y_test_imdb) = tf.keras.datasets.imdb.load_data()
     temp1 =  x_train_imdb[divmod(len(x_train_imdb), 2)[0]: divmod(len(x_train_imdb), 2)[0] + k]
+    
     x_train_imdb = x_train_imdb[:k]
     x_train_imdb = np.append(temp1, x_train_imdb)
+
     temp1 = y_train_imdb[divmod(len(y_train_imdb), 2)[0]: divmod(len(y_train_imdb), 2)[0] + k]
+
     y_train_imdb = y_train_imdb[:k]
     y_train_imdb = np.append(temp1, y_train_imdb)
     
@@ -80,6 +83,7 @@ for k in list1:
     imdb_rnn.compile(loss=tf.keras.losses.BinaryCrossentropy(), 
                     optimizer=tf.keras.optimizers.SGD(),
                     metrics=['binary_accuracy'])
+    
     epochs = [2, 4, 6, 8, 10]
     for e in epochs:
         imdb_rnn.fit(x=x_train_imdb, y=y_train_imdb,

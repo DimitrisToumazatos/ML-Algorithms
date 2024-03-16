@@ -152,13 +152,16 @@ class AdaBoost:
             self.h_t.append(ht)
             algorithm_results = ht.predict(x_train)
             error = 0
+
             for j in range(len(y_train)):   #calculate the error using each examples weight
                 if(y_train[j] != algorithm_results[j]):
                     error += self.w[j]
+
             if (error >= 0.5):  #if error is greater than 0.5, remove the feature from our list
                 self.h_t.remove(ht)
                 self.keys.remove(ht.feature)
                 continue
+
             z = 0
             if (error != 0):    #set the weight of the voting of each hypothesis
                 z = 0.5 * log2((1 - error)/ error)
@@ -166,6 +169,7 @@ class AdaBoost:
                 z = 1
             elif error >= 0.5:
                 z = 0
+
             self.z.append(z)
             for j in range(len(y_train)): #change weights based on the errors and their exp value
                 if (algorithm_results[j] == y_train[j]):
@@ -173,6 +177,7 @@ class AdaBoost:
                 else:
                     if (error != 0):
                         self.w[j] = self.w[j] * exp(z)
+                        
             self.normalizeWeights()
             i += 1
 
